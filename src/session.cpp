@@ -1,4 +1,5 @@
 module ile;
+import :wav;
 import fmt;
 import cpx.fmt;
 import cpx.protobuf;
@@ -7,14 +8,14 @@ ile::Session::Session(tcp::socket socket)
     : socket(std::move(socket)) {}
 
 asio::awaitable<void> ile::Session::run() {
-    auto self = shared_from_this();
+    auto _ = shared_from_this();
 
     beast::flat_buffer buffer;
     http::request      req;
     try {
-        co_await http::async_read(self->socket, buffer, req);
+        co_await http::async_read(socket, buffer, req);
 
-        const auto remote = self->socket.remote_endpoint();
+        const auto remote = socket.remote_endpoint();
         fmt::println(
             "[{}:{}] {} {} HTTP/{}.{}",
             remote.address().to_string(),
@@ -26,9 +27,9 @@ asio::awaitable<void> ile::Session::run() {
         );
 
         if (ws::is_upgrade(req)) {
-            co_await self->handle_websocket(req);
+            co_await handle_websocket(req);
         } else {
-            co_await self->handle_http(req);
+            co_await handle_http(req);
         }
     } catch (std::exception const &e) {
         std::cerr << "session error: " << e.what() << '\n';
@@ -36,9 +37,7 @@ asio::awaitable<void> ile::Session::run() {
 }
 
 asio::awaitable<void> ile::Session::handle_websocket(const beast::http::request &req) {
-    auto self = shared_from_this();
-
-    ws::stream<tcp::socket> ws(std::move(self->socket));
+    ws::stream<tcp::socket> ws(std::move(socket));
     co_await ws.async_accept(req);
 
     beast::flat_buffer buffer;
@@ -59,25 +58,24 @@ asio::awaitable<void> ile::Session::handle_websocket(const beast::http::request 
             }
 
             const auto size = chunk.pcm.size();
+            const auto pcm  = chunk.pcm;
             chunk.pcm       = "";
             if (chunk.bits_per_sample)
                 try {
                     fmt::println("chunk={}, size={}, buffer_size={}", chunk, size, buffer_size);
                 } catch (std::exception &e) {
                     fmt::println("{}", e.what());
-                    std::ignore = e;
                 }
 
+            write_wav(std::string(chunk.branch) + "-" + std::string(chunk.counter) + ".wav", chunk.sample_rate, pcm);
             buffer.consume(buffer.size());
         }
     } catch (std::exception &e) {
-        std::ignore = e;
+        fmt::println("hard fault: {}", e.what());
     }
 }
 
 asio::awaitable<void> ile::Session::handle_http(const beast::http::request &req) {
-    auto self = shared_from_this();
-
     http::response res;
     res.version(req.version());
     res.set(http::field::server, "ile");
@@ -104,5 +102,5 @@ asio::awaitable<void> ile::Session::handle_http(const beast::http::request &req)
     }
 
     res.prepare_payload();
-    co_await http::async_write(self->socket, res);
+    co_await http::async_write(socket, res);
 }
