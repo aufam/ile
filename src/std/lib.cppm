@@ -6,11 +6,14 @@ module;
 #include <string>
 #include <fstream>
 #include <chrono>
+#include <array>
+#include <cstring>
 #include <vector>
 
 export module ile:std;
 
 export namespace std {
+    using ::std::array;
     using ::std::cerr;
     using ::std::cout;
     using ::std::enable_shared_from_this;
@@ -27,11 +30,15 @@ export namespace std {
     using ::std::istreambuf_iterator;
     using ::std::make_shared;
     using ::std::make_unique;
+    using ::std::memcmp;
+    using ::std::memcpy;
     using ::std::move;
+    using ::std::ofstream;
     using ::std::ostream;
     using ::std::runtime_error;
     using ::std::set;
     using ::std::shared_ptr;
+    using ::std::streamsize;
     using ::std::string;
     using ::std::string_view;
     using ::std::tie;

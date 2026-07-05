@@ -1,4 +1,4 @@
-import ile;
+module ile;
 import fmt;
 import cpx.cli11;
 
@@ -28,7 +28,7 @@ asio::awaitable<void> async_terminate(asio::io_context &io, bool &is_running) {
     is_running = false;
 }
 
-int main(int argc, char **argv) {
+extern "C++" int main(int argc, char **argv) {
     bool is_running = true;
 
     try {

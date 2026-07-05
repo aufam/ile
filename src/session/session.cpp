@@ -1,8 +1,10 @@
 module ile;
-import :wav;
 import fmt;
 import cpx.fmt;
 import cpx.protobuf;
+
+namespace http = beast::http;
+namespace ws   = beast::websocket;
 
 ile::Session::Session(tcp::socket socket)
     : socket(std::move(socket)) {}
@@ -67,7 +69,11 @@ asio::awaitable<void> ile::Session::handle_websocket(const beast::http::request 
                     fmt::println("{}", e.what());
                 }
 
-            write_wav(std::string(chunk.branch) + "-" + std::string(chunk.counter) + ".wav", chunk.sample_rate, pcm);
+            chunk.pcm = pcm;
+            auto res  = chunk.write_wav();
+            if (res.is_err()) {
+                fmt::println("write wav error: {}", res.error().what());
+            }
             buffer.consume(buffer.size());
         }
     } catch (std::exception &e) {
