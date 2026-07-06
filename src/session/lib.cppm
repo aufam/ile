@@ -3,6 +3,7 @@ import :std;
 import :asio;
 import :beast;
 import :tcp;
+import :cli;
 
 export namespace ile {
     class Session;
@@ -11,12 +12,13 @@ export namespace ile {
 
 class ile::Session : public std::enable_shared_from_this<Session> {
 public:
-    Session(tcp::socket socket);
+    Session(tcp::socket socket, const ile::Cli &cli);
 
     asio::awaitable<void> run();
 
 private:
-    tcp::socket socket;
+    tcp::socket     socket;
+    const ile::Cli &cli;
 
     asio::awaitable<void> handle_websocket(const beast::http::request &req);
 

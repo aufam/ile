@@ -9,6 +9,10 @@ module;
 #include <array>
 #include <cstring>
 #include <vector>
+#include <optional>
+#include <unordered_map>
+#include <unordered_set>
+#include <algorithm>
 
 export module ile:std;
 
@@ -34,23 +38,30 @@ export namespace std {
     using ::std::memcpy;
     using ::std::move;
     using ::std::ofstream;
+    using ::std::optional;
     using ::std::ostream;
     using ::std::runtime_error;
     using ::std::set;
     using ::std::shared_ptr;
+    using ::std::sort;
     using ::std::streamsize;
     using ::std::string;
     using ::std::string_view;
     using ::std::tie;
+    using ::std::transform;
     using ::std::tuple;
     using ::std::tuple_cat;
     using ::std::unique_ptr;
+    using ::std::unordered_map;
+    using ::std::unordered_set;
     using ::std::vector;
 
     using ::std::operator<<;
     using ::std::operator>>;
     using ::std::operator+;
     using ::std::operator==;
+    using ::std::operator|;
+    using ::std::operator&;
 } // namespace std
 
 export namespace std::chrono {

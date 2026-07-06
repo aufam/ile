@@ -16,6 +16,7 @@ export namespace beast {
 } // namespace beast
 
 export namespace beast::websocket {
+    using ::boost::beast::websocket::error;
     using ::boost::beast::websocket::is_upgrade;
     using ::boost::beast::websocket::stream;
 } // namespace beast::websocket

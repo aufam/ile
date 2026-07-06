@@ -1,59 +1,36 @@
 module;
 
 #include <whisper.h>
+#include <miniaudio.h>
 
 module ile;
 
-struct WavHeader {
-    char     riff[4];
-    uint32_t chunk_size;
-    char     wave[4];
+std::vector<float> load_audio(const char *filename) {
+    ma_decoder_config config = ma_decoder_config_init(
+        ma_format_f32, // output format
+        1,             // mono
+        16000          // sample rate
+    );
 
-    char     fmt[4];
-    uint32_t fmt_size;
-    uint16_t audio_format;
-    uint16_t channels;
-    uint32_t sample_rate;
-    uint32_t byte_rate;
-    uint16_t block_align;
-    uint16_t bits_per_sample;
+    ma_decoder decoder;
+    if (ma_decoder_init_file(filename, &config, &decoder) != MA_SUCCESS) {
+        throw std::runtime_error("Failed to open audio file");
+    }
 
-    char     data[4];
-    uint32_t data_size;
-};
+    ma_uint64 frameCount;
+    if (ma_decoder_get_length_in_pcm_frames(&decoder, &frameCount) != MA_SUCCESS) {
+        ma_decoder_uninit(&decoder);
+        throw std::runtime_error("Failed to determine audio length");
+    }
 
-std::vector<float> load_wav(const fs::path &path) {
-    std::ifstream file(path, std::ios::binary);
-    if (!file)
-        throw std::runtime_error("Cannot open WAV file");
+    std::vector<float> pcm(frameCount);
 
-    WavHeader header{};
-    file.read(reinterpret_cast<char *>(&header), sizeof(header));
+    ma_uint64 framesRead;
+    ma_decoder_read_pcm_frames(&decoder, pcm.data(), frameCount, &framesRead);
 
-    if (std::memcmp(header.riff, "RIFF", 4) != 0 || std::memcmp(header.wave, "WAVE", 4) != 0)
-        throw std::runtime_error("Not a WAV file");
+    pcm.resize(framesRead);
 
-    if (header.audio_format != 1)
-        throw std::runtime_error("Only PCM WAV is supported");
-
-    if (header.channels != 1)
-        throw std::runtime_error("Only mono WAV is supported");
-
-    if (header.sample_rate != 16000)
-        throw std::runtime_error("Sample rate must be 16000 Hz");
-
-    if (header.bits_per_sample != 16)
-        throw std::runtime_error("Only 16-bit PCM is supported");
-
-    size_t samples = header.data_size / sizeof(int16_t);
-
-    std::vector<int16_t> pcm16(samples);
-    file.read(reinterpret_cast<char *>(pcm16.data()), header.data_size);
-
-    std::vector<float> pcm(samples);
-
-    for (size_t i = 0; i < samples; ++i)
-        pcm[i] = pcm16[i] / 32768.0f;
+    ma_decoder_uninit(&decoder);
 
     return pcm;
 }
@@ -71,14 +48,17 @@ ile::Whisper::~Whisper() {
     whisper_free(ctx);
 }
 
-std::string ile::Whisper::transcribe_file(const fs::path &path) {
+std::string
+ile::Whisper::transcribe_file(const std::string &path, const std::string &language, bool detect_language, bool translate) {
     auto ctx = static_cast<whisper_context *>(this->ctx);
-
-    auto pcm = load_wav(path);
+    auto pcm = load_audio(path.c_str());
 
     whisper_full_params params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
+    params.language            = language.c_str();
+    params.detect_language     = detect_language;
+    params.translate           = translate;
 
-    if (whisper_full(ctx, params, pcm.data(), pcm.size()) != 0)
+    if (whisper_full(ctx, params, pcm.data(), (int)pcm.size()) != 0)
         throw std::runtime_error("Transcription failed");
 
     std::string result;

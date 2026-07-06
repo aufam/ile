@@ -11,7 +11,9 @@ public:
     Whisper(const std::string &model);
     ~Whisper();
 
-    std::string transcribe_file(const fs::path &);
+    std::string transcribe_file(
+        const std::string &path, const std::string &language = "auto", bool detect_language = false, bool translate = false
+    );
 
 private:
     void *ctx;

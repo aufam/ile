@@ -6,8 +6,9 @@ import cpx.protobuf;
 namespace http = beast::http;
 namespace ws   = beast::websocket;
 
-ile::Session::Session(tcp::socket socket)
-    : socket(std::move(socket)) {}
+ile::Session::Session(tcp::socket socket, const ile::Cli &cli)
+    : socket(std::move(socket))
+    , cli(cli) {}
 
 asio::awaitable<void> ile::Session::run() {
     auto _ = shared_from_this();
@@ -43,41 +44,46 @@ asio::awaitable<void> ile::Session::handle_websocket(const beast::http::request 
     co_await ws.async_accept(req);
 
     beast::flat_buffer buffer;
-    try {
-        while (true) {
+
+    while (true) {
+        try {
             co_await ws.async_read(buffer);
+        } catch (boost::system::system_error &e) {
+            if (e.code() == ws::error::closed) {
+                fmt::println("closed");
+                break;
+            }
+            throw;
+        }
 
-            const auto buffer_size = buffer.size();
+        const auto buffer_size = buffer.size();
 
-            std::string_view sv(static_cast<const char *>(buffer.data().data()), buffer.size());
+        std::string_view sv(static_cast<const char *>(buffer.data().data()), buffer.size());
 
-            AudioChunk chunk = {};
+        AudioChunk chunk = {};
+        try {
+            cpx::protobuf::parse(sv, chunk);
+        } catch (std::exception &e) {
+            fmt::println("{}", e.what());
+            std::ignore = e;
+        }
+
+        const auto size = chunk.pcm.size();
+        const auto pcm  = chunk.pcm;
+        chunk.pcm       = "";
+        if (chunk.bits_per_sample)
             try {
-                cpx::protobuf::parse(sv, chunk);
+                fmt::println("chunk={}, size={}, buffer_size={}", chunk, size, buffer_size);
             } catch (std::exception &e) {
                 fmt::println("{}", e.what());
-                std::ignore = e;
             }
 
-            const auto size = chunk.pcm.size();
-            const auto pcm  = chunk.pcm;
-            chunk.pcm       = "";
-            if (chunk.bits_per_sample)
-                try {
-                    fmt::println("chunk={}, size={}, buffer_size={}", chunk, size, buffer_size);
-                } catch (std::exception &e) {
-                    fmt::println("{}", e.what());
-                }
-
-            chunk.pcm = pcm;
-            auto res  = chunk.write_wav();
-            if (res.is_err()) {
-                fmt::println("write wav error: {}", res.error().what());
-            }
-            buffer.consume(buffer.size());
+        chunk.pcm = pcm;
+        auto res  = chunk.write_wav();
+        if (res.is_err()) {
+            fmt::println("write wav error: {}", res.error().what());
         }
-    } catch (std::exception &e) {
-        fmt::println("hard fault: {}", e.what());
+        buffer.consume(buffer.size());
     }
 }
 

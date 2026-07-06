@@ -30,7 +30,7 @@ auto ile::AudioChunk::write_wav() const -> cpx::Result<void> {
     if (!fs::exists(path)) {
         std::ofstream os(path, std::ios::binary);
         if (!os)
-            throw std::runtime_error("failed to create wav file");
+            return std::runtime_error("failed to create wav file");
 
         // RIFF header
         os.write("RIFF", 4);
@@ -62,7 +62,7 @@ auto ile::AudioChunk::write_wav() const -> cpx::Result<void> {
 
     std::fstream fs(path, std::ios::binary | std::ios::in | std::ios::out);
     if (!fs)
-        throw std::runtime_error("failed to open wav file");
+        return std::runtime_error("failed to open wav file");
 
     // Update RIFF chunk size.
     auto riff_size = static_cast<unsigned int>(file_size - 8 + pcm.size());
