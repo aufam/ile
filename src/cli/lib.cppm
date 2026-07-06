@@ -23,6 +23,12 @@ struct ile::Cli {
         int         ollama_port = 11434;
     };
     std::optional<Evaluate> evalueate;
+
+    struct Record {
+        std::string output_path;
+        void        record() const;
+    };
+    std::optional<Record> record;
 };
 
 template <>
@@ -33,16 +39,18 @@ struct cpx::Reflect<ile::Cli> : cpx::Fields<
                                     &ile::Cli::language,
                                     &ile::Cli::detect_language,
                                     &ile::Cli::translate,
-                                    &ile::Cli::transcribe> {
+                                    &ile::Cli::transcribe,
+                                    &ile::Cli::record> {
     static constexpr TagInfo port            = "port,skipmissing";
     static constexpr TagInfo model           = "model,skipmissing";
     static constexpr TagInfo language        = "language,skipmissing";
     static constexpr TagInfo detect_language = "detect-language";
     static constexpr TagInfo translate       = "translate";
     static constexpr TagInfo transcribe      = "transcribe";
+    static constexpr TagInfo record          = "record";
 
     static constexpr tags_type tags() {
-        return std::tie(port, model, language, detect_language, translate, transcribe);
+        return std::tie(port, model, language, detect_language, translate, transcribe, record);
     }
 };
 
@@ -63,5 +71,14 @@ struct cpx::Reflect<ile::Cli::Evaluate>
 
     static constexpr tags_type tags() {
         return std::tie(host, port);
+    }
+};
+
+template <>
+struct cpx::Reflect<ile::Cli::Record> : cpx::Fields<cpx::Reflect<ile::Cli::Record>, &ile::Cli::Record::output_path> {
+    static constexpr TagInfo output_path = "output,positional";
+
+    static constexpr tags_type tags() {
+        return std::tie(output_path);
     }
 };

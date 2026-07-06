@@ -17,8 +17,19 @@ module;
 export module ile:std;
 
 export namespace std {
+    using ::std::int16_t;
+    using ::std::int32_t;
+    using ::std::int64_t;
+    using ::std::int8_t;
+    using ::std::size_t;
+    using ::std::uint16_t;
+    using ::std::uint32_t;
+    using ::std::uint64_t;
+    using ::std::uint8_t;
+
     using ::std::array;
     using ::std::cerr;
+    using ::std::cin;
     using ::std::cout;
     using ::std::enable_shared_from_this;
     using ::std::endl;

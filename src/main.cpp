@@ -31,7 +31,12 @@ asio::awaitable<void> async_terminate(asio::io_context &io, bool &is_running) {
 extern "C++" int main(int argc, char **argv) {
     bool is_running = true;
 
-    auto cli = cpx::cli11::parse<ile::Cli>("ile", argc, argv);
+    const auto cli = cpx::cli11::parse<ile::Cli>("ile", argc, argv);
+
+    if (const auto &r = cli.record; r.has_value()) {
+        r->record();
+        return 0;
+    }
 
     ile::Whisper whisper(cli.model);
 
