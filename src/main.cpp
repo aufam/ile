@@ -2,7 +2,7 @@ module ile;
 import fmt;
 import cpx.cli11;
 
-asio::awaitable<void> async_main(const ile::Cli &cli, bool &is_running) {
+asio::awaitable<void> async_main(const ile::Cli &cli, ile::Whisper &whisper, bool &is_running) {
     auto io = co_await asio::this_coro::executor;
 
     auto acceptor = tcp::acceptor(io, {tcp::v4(), (unsigned short)cli.port});
@@ -12,7 +12,7 @@ asio::awaitable<void> async_main(const ile::Cli &cli, bool &is_running) {
     while (is_running) {
         tcp::socket socket = co_await acceptor.async_accept();
 
-        auto session = std::make_shared<ile::Session>(std::move(socket), cli);
+        auto session = std::make_shared<ile::Session>(std::move(socket), cli, whisper);
 
         asio::co_spawn(io, session->run(), asio::detached);
     }
@@ -46,16 +46,17 @@ extern "C++" int main(int argc, char **argv) {
         return 0;
     }
 
-    try {
-        asio::io_context io(8);
-        asio::co_spawn(io, async_main(cli, is_running), asio::detached);
-        asio::co_spawn(io, async_terminate(io, is_running), asio::detached);
+    asio::io_context io;
+    asio::co_spawn(io, async_main(cli, whisper, is_running), asio::detached);
+    asio::co_spawn(io, async_terminate(io, is_running), asio::detached);
 
-        io.run();
-    } catch (std::exception &e) {
-        fmt::println("{}", e.what());
-        return 1;
-    }
+    std::vector<std::thread> ts;
+    ts.reserve(8);
+    for (int i = 0; i < 8; ++i)
+        ts.emplace_back([&]() { io.run(); });
+
+    for (int i = 0; i < 8; ++i)
+        ts[i].join();
 
     return 0;
 }

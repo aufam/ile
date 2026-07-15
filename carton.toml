@@ -10,10 +10,6 @@ cpx = {
     version = "0.1.0",
     features = ["fmt", "cli", "json", "protobuf"],
 }
-ggml = {
-    version = "0.15.3",
-    # features = ["blas", "metal"],
-}
 whisper = {
     version = "1.9.1",
     # features = ["ggml/blas", "ggml/metal"], # only for mac

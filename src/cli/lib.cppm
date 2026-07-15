@@ -15,70 +15,41 @@ struct ile::Cli {
 
     struct Transcribe {
         std::string file;
+
+        static constexpr std::tuple __field_tags__ = {
+            cpx::field<&Transcribe::file> = "file,positional",
+        };
     };
     std::optional<Transcribe> transcribe;
 
     struct Evaluate {
         std::string ollama_host = "localhost";
         int         ollama_port = 11434;
+
+        static constexpr std::tuple __field_tags__ = {
+            cpx::field<&Evaluate::ollama_host> = "host,skipmissing",
+            cpx::field<&Evaluate::ollama_port> = "port,skipmissing",
+        };
     };
     std::optional<Evaluate> evalueate;
 
     struct Record {
         std::string output_path;
         void        record() const;
+
+        static constexpr std::tuple __field_tags__ = {
+            cpx::field<&Record::output_path> = "output,positional",
+        };
     };
     std::optional<Record> record;
-};
 
-template <>
-struct cpx::Reflect<ile::Cli> : cpx::Fields<
-                                    cpx::Reflect<ile::Cli>,
-                                    &ile::Cli::port,
-                                    &ile::Cli::model,
-                                    &ile::Cli::language,
-                                    &ile::Cli::detect_language,
-                                    &ile::Cli::translate,
-                                    &ile::Cli::transcribe,
-                                    &ile::Cli::record> {
-    static constexpr TagInfo port            = "port,skipmissing";
-    static constexpr TagInfo model           = "model,skipmissing";
-    static constexpr TagInfo language        = "language,skipmissing";
-    static constexpr TagInfo detect_language = "detect-language";
-    static constexpr TagInfo translate       = "translate";
-    static constexpr TagInfo transcribe      = "transcribe";
-    static constexpr TagInfo record          = "record";
-
-    static constexpr tags_type tags() {
-        return std::tie(port, model, language, detect_language, translate, transcribe, record);
-    }
-};
-
-template <>
-struct cpx::Reflect<ile::Cli::Transcribe> : cpx::Fields<cpx::Reflect<ile::Cli::Transcribe>, &ile::Cli::Transcribe::file> {
-    static constexpr TagInfo file = "file,positional";
-
-    static constexpr tags_type tags() {
-        return std::tie(file);
-    }
-};
-
-template <>
-struct cpx::Reflect<ile::Cli::Evaluate>
-    : cpx::Fields<cpx::Reflect<ile::Cli::Evaluate>, &ile::Cli::Evaluate::ollama_host, &ile::Cli::Evaluate::ollama_port> {
-    static constexpr TagInfo host = "host,skipmissing";
-    static constexpr TagInfo port = "port,skipmissing";
-
-    static constexpr tags_type tags() {
-        return std::tie(host, port);
-    }
-};
-
-template <>
-struct cpx::Reflect<ile::Cli::Record> : cpx::Fields<cpx::Reflect<ile::Cli::Record>, &ile::Cli::Record::output_path> {
-    static constexpr TagInfo output_path = "output,positional";
-
-    static constexpr tags_type tags() {
-        return std::tie(output_path);
-    }
+    static constexpr std::tuple __field_tags__ = {
+        cpx::field<&Cli::port>            = "port,skipmissing",
+        cpx::field<&Cli::model>           = "model,skipmissing",
+        cpx::field<&Cli::language>        = "language,skipmissing",
+        cpx::field<&Cli::detect_language> = "detect-language",
+        cpx::field<&Cli::translate>       = "translate",
+        cpx::field<&Cli::transcribe>      = "transcribe",
+        cpx::field<&Cli::record>          = "record",
+    };
 };

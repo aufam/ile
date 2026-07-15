@@ -13,6 +13,10 @@ module;
 #include <unordered_map>
 #include <unordered_set>
 #include <algorithm>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <atomic>
 
 export module ile:std;
 
@@ -66,6 +70,15 @@ export namespace std {
     using ::std::unordered_map;
     using ::std::unordered_set;
     using ::std::vector;
+
+    using ::std::atomic;
+    using ::std::atomic_bool;
+    using ::std::condition_variable;
+    using ::std::lock_guard;
+    using ::std::mutex;
+    using ::std::scoped_lock;
+    using ::std::thread;
+    using ::std::unique_lock;
 
     using ::std::operator<<;
     using ::std::operator>>;

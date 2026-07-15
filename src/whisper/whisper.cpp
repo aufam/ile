@@ -2,6 +2,7 @@ module;
 
 #include <whisper.h>
 #include <miniaudio.h>
+#include <cmath>
 
 module ile;
 
@@ -59,6 +60,60 @@ ile::Whisper::transcribe_file(const std::string &path, const std::string &langua
     params.translate           = translate;
 
     if (whisper_full(ctx, params, pcm.data(), (int)pcm.size()) != 0)
+        throw std::runtime_error("Transcription failed");
+
+    std::string result;
+
+    int n = whisper_full_n_segments(ctx);
+    for (int i = 0; i < n; ++i)
+        result += whisper_full_get_segment_text(ctx, i);
+
+    return result;
+}
+
+std::string
+ile::Whisper::transcrib_chunk(const AudioChunk &chunk, const std::string &language, bool detect_language, bool translate) {
+    auto ctx = static_cast<whisper_context *>(this->ctx);
+
+    whisper_full_params params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
+    params.language            = language.c_str();
+    params.detect_language     = detect_language;
+    params.translate           = translate;
+
+    const auto pcm = chunk.to_pcm_f32();
+    if (whisper_full(ctx, params, pcm.data(), (int)pcm.size()) != 0)
+        throw std::runtime_error("Transcription failed");
+
+    std::string result;
+
+    int n = whisper_full_n_segments(ctx);
+    for (int i = 0; i < n; ++i)
+        result += whisper_full_get_segment_text(ctx, i);
+
+    return result;
+}
+
+float rms(const float *samples, int n) {
+    float e = 0.f;
+    for (int i = 0; i < n; ++i)
+        e += samples[i] * samples[i];
+
+    return std::sqrt(e / float(n));
+}
+
+std::string
+ile::Whisper::transcrib_pcm(const float *data, int size, const std::string &language, bool detect_language, bool translate) {
+    auto ctx = static_cast<whisper_context *>(this->ctx);
+
+    if (rms(data, size) < 0.02f)
+        return "";
+
+    whisper_full_params params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
+    params.language            = language.c_str();
+    params.detect_language     = detect_language;
+    params.translate           = translate;
+
+    if (whisper_full(ctx, params, data, size) != 0)
         throw std::runtime_error("Transcription failed");
 
     std::string result;

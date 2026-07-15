@@ -3,16 +3,188 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>PCM Streaming</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PCM Audio Stream & Visualizer Dashboard</title>
+  <!-- Modern responsive custom styles -->
+  <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
 
-  <button id="start">Start</button>
-  <button id="stop" disabled>Stop</button>
+  <main class="dashboard-container">
 
-  <script type="module" src="index.js"></script>
+    <!-- Header Section -->
+    <header class="main-header">
+      <div class="header-branding">
+        <span class="icon-wrapper">
+          <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z">
+            </path>
+          </svg>
+        </span>
+        <div>
+          <h1 class="app-title">
+            ILE Stream Center <span class="badge">PCM Sender</span>
+          </h1>
+          <p class="app-subtitle">High fidelity live audio microphone capture and transmission pipeline</p>
+        </div>
+      </div>
 
+      <!-- Global Status Indicator -->
+      <div class="status-indicator">
+        <div class="status-badge">
+          <div id="status-dot" class="status-dot stopped"></div>
+          <span id="status-text" class="status-text">Engine Stopped</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Dashboard Split Screen -->
+    <div class="dashboard-grid">
+
+      <!-- Left Panel: Connection, Configuration, Control Panel -->
+      <section class="left-panel">
+
+        <!-- Audio Core Settings -->
+        <div class="card">
+          <h2 class="card-title">
+            <span class="card-icon">⚙️</span> Transmission Configuration
+          </h2>
+
+          <!-- Web Socket URL -->
+          <div class="input-group">
+            <label for="ws-url" class="input-label">WebSocket Destination URL</label>
+            <input type="text" id="ws-url" value="ws://localhost:8080/audio" class="text-input font-mono">
+          </div>
+
+          <!-- Client/Device Identifiers -->
+          <div class="grid-2-col">
+            <div class="input-group">
+              <label for="branch-id" class="input-label">Branch ID</label>
+              <input type="text" id="branch-id" value="Jakarta" class="text-input font-mono">
+            </div>
+            <div class="input-group">
+              <label for="counter-id" class="input-label">Counter ID</label>
+              <input type="text" id="counter-id" value="A1" class="text-input font-mono">
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="client-id" class="input-label">Client ID</label>
+            <input type="text" id="client-id" value="1234" class="text-input font-mono">
+          </div>
+
+          <!-- Audio Parameters -->
+          <div class="grid-2-col">
+            <div class="input-group">
+              <label for="sample-rate" class="input-label">Sample Rate (Hz)</label>
+              <select id="sample-rate" class="select-input font-mono">
+                <option value="8000">8000 Hz</option>
+                <option value="16000">16000 Hz</option>
+                <option value="24000">24000 Hz</option>
+                <option value="32000">32000 Hz</option>
+                <option value="44100" selected>44100 Hz</option>
+                <option value="48000">48000 Hz</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label for="fft-size" class="input-label">FFT Resolution</label>
+              <select id="fft-size" class="select-input font-mono">
+                <option value="128">128</option>
+                <option value="256" selected>256</option>
+                <option value="512">512</option>
+                <option value="1024">1024</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Connect Controls -->
+          <div class="btn-row">
+            <button id="btn-connect" class="btn btn-primary">
+              <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z">
+                </path>
+              </svg>
+              Start Streaming
+            </button>
+            <button id="btn-disconnect" disabled class="btn btn-secondary">
+              Stop Streaming
+            </button>
+          </div>
+        </div>
+
+        <!-- Live AI Translation and Transcription Panel -->
+        <div class="card">
+          <div class="card-header-with-badge">
+            <h2 class="card-title">
+              <span class="card-icon">💬</span> Real-time AI Transcript
+            </h2>
+            <span class="badge bg-indigo-500-10">Feedback</span>
+          </div>
+          <div class="transcript-wrapper">
+            <div id="live-transcript" class="transcript-box custom-scroll">
+              <span class="text-slate-500 italic">Waiting for connection & outgoing speech...</span>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Center/Right Panels: Visualizer & Diagnostics -->
+      <section class="right-panel">
+
+        <!-- Interactive Canvas Visualizer Screen -->
+        <div class="card">
+          <div class="visualizer-header">
+            <h2 class="card-title">
+              <span class="card-icon">📊</span> Voice Stream Visualizer
+            </h2>
+            <!-- Visualizer Modes Selection -->
+            <div class="tab-group">
+              <button id="view-bars" class="tab-btn active">Spectrum</button>
+              <button id="view-wave" class="tab-btn">Waveform</button>
+              <button id="view-radar" class="tab-btn">Radial Graph</button>
+            </div>
+          </div>
+
+          <!-- Canvas Box -->
+          <div class="canvas-wrapper">
+            <canvas id="canvas-element"></canvas>
+
+            <!-- Overlay elements showing active statistics -->
+            <div class="stats-overlay">
+              <span id="stat-latency" class="stat-tag tag-indigo">Captured: 0 ms</span>
+              <span id="stat-peaks" class="stat-tag tag-emerald">RMS Peak: -0.00 dB</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Event Logs & Diagnostics -->
+        <div class="card">
+          <div class="logs-header">
+            <h2 class="card-title">
+              <span class="card-icon">📝</span> Engine Telemetry & System Diagnostics
+            </h2>
+            <button id="btn-clear-logs" class="clear-btn">Clear logs</button>
+          </div>
+
+          <!-- Terminal Style Output Box -->
+          <div id="logs-container" class="terminal-log custom-scroll">
+            <p class="log-entry log-system"><span class="log-time">[System]</span> Capture dashboard initialized. Click
+              "Start Streaming" to mount user media and initiate pipeline.</p>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- Custom client logic file -->
+  <script type="module" src="app.js" defer></script>
 </body>
 
 </html>
