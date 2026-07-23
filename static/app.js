@@ -199,8 +199,10 @@ draw();
 
 // --- START CAPTURE & STREAM TRANSMISSION TRIGGER ---
 btnConnect.onclick = async () => {
-  // const wsAddress = wsUrlInput.value.trim();
-  const wsAddress = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/audio`;
+  let wsAddress = wsUrlInput.value.trim();
+  if (wsAddress === "") {
+    wsAddress = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/audio`;
+  }
   const branch = branchInput.value.trim();
   const counter = counterInput.value.trim();
   const clientId = clientInput.value.trim();

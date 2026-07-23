@@ -2,35 +2,39 @@ module ile;
 import fmt;
 import cpx.cli11;
 
-asio::awaitable<void> async_main(const ile::Cli &cli, ile::Whisper &whisper, bool &is_running) {
+asio::awaitable<void> async_main(tcp::acceptor &acceptor, const ile::Cli &cli, ile::Whisper &whisper) {
     auto io = co_await asio::this_coro::executor;
-
-    auto acceptor = tcp::acceptor(io, {tcp::v4(), (unsigned short)cli.port});
 
     fmt::println("Server is running on http://localhost:{}", cli.port);
 
-    while (is_running) {
-        tcp::socket socket = co_await acceptor.async_accept();
+    while (true) {
+        try {
+            tcp::socket socket = co_await acceptor.async_accept();
 
-        auto session = std::make_shared<ile::Session>(std::move(socket), cli, whisper);
+            auto session = std::make_shared<ile::Session>(std::move(socket), cli, whisper);
 
-        asio::co_spawn(io, session->run(), asio::detached);
+            asio::co_spawn(io, session->run(), asio::detached);
+        } catch (boost::system::system_error &e) {
+            if (e.code() == asio::error::basic_errors::operation_aborted)
+                fmt::println("Acceptor stopped.");
+            else
+                fmt::println("Accept error: {}", e.what());
+            break;
+        }
     }
 }
 
-asio::awaitable<void> async_terminate(asio::io_context &io, bool &is_running) {
-    asio::signal_set signals(io, asio::signals::sigint, asio::signals::sigterm);
+asio::awaitable<void> async_terminate(tcp::acceptor &acceptor) {
+    asio::signal_set signals(co_await asio::this_coro::executor, asio::signals::sigint, asio::signals::sigterm);
 
     auto signal = co_await signals.async_wait();
-
     fmt::println("Got signal={}", signal);
 
-    is_running = false;
+    boost::system::error_code ec;
+    std::ignore = acceptor.close(ec);
 }
 
 extern "C++" int main(int argc, char **argv) {
-    bool is_running = true;
-
     const auto cli = cpx::cli11::parse<ile::Cli>("ile", argc, argv);
 
     if (const auto &r = cli.record; r.has_value()) {
@@ -46,9 +50,30 @@ extern "C++" int main(int argc, char **argv) {
         return 0;
     }
 
-    asio::io_context io;
-    asio::co_spawn(io, async_main(cli, whisper, is_running), asio::detached);
-    asio::co_spawn(io, async_terminate(io, is_running), asio::detached);
+    asio::io_context          io;
+    boost::system::error_code ec;
+
+    tcp::endpoint endpoint(tcp::v4(), static_cast<unsigned short>(cli.port));
+    tcp::acceptor acceptor(io);
+
+    std::ignore = acceptor.open(endpoint.protocol(), ec);
+    if (!ec)
+        std::ignore = acceptor.set_option(tcp::acceptor::reuse_address(true), ec); // Good practice for fast restarts
+    if (!ec)
+        std::ignore = acceptor.bind(endpoint, ec);
+    if (!ec)
+        std::ignore = acceptor.listen(asio::socket_base::max_listen_connections, ec);
+
+    if (ec) {
+        if (ec == asio::error::basic_errors::address_in_use)
+            fmt::println("Error: Port {} is already in use.", cli.port);
+        else
+            fmt::println("Failed to start acceptor on port {}: {}", cli.port, ec.message());
+        return 1;
+    }
+
+    asio::co_spawn(io, async_main(acceptor, cli, whisper), asio::detached);
+    asio::co_spawn(io, async_terminate(acceptor), asio::detached);
 
     std::vector<std::thread> ts;
     ts.reserve(8);

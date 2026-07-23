@@ -8,6 +8,9 @@ module;
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/asio/signal_set.hpp>
+#include <boost/asio/socket_base.hpp>
+#include <boost/asio/redirect_error.hpp>
+#include <boost/asio/error.hpp>
 
 export module ile:asio;
 
@@ -19,10 +22,17 @@ export namespace asio {
     using ::boost::asio::detached;
     using ::boost::asio::io_context;
     using ::boost::asio::post;
+    using ::boost::asio::redirect_error;
     using ::boost::asio::signal_set;
+    using ::boost::asio::socket_base;
     using ::boost::asio::steady_timer;
     using ::boost::asio::use_awaitable;
+    using ::boost::asio::error::basic_errors;
 } // namespace asio
+
+export namespace asio::error {
+    using ::boost::asio::error::basic_errors;
+}
 
 export namespace asio::signals {
     constexpr auto sigint  = SIGINT;

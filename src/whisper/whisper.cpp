@@ -3,8 +3,10 @@ module;
 #include <whisper.h>
 #include <miniaudio.h>
 #include <cmath>
+#include <chrono>
 
 module ile;
+import fmt;
 
 std::vector<float> load_audio(const char *filename) {
     ma_decoder_config config = ma_decoder_config_init(
@@ -108,10 +110,15 @@ ile::Whisper::transcrib_pcm(const float *data, int size, const std::string &lang
     if (rms(data, size) < 0.02f)
         return "";
 
+    auto start = std::chrono::steady_clock::now();
+
     whisper_full_params params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
     params.language            = language.c_str();
     params.detect_language     = detect_language;
     params.translate           = translate;
+
+    auto init = std::chrono::steady_clock::now();
+    fmt::println("whisper chunk init: {}", init - start);
 
     if (whisper_full(ctx, params, data, size) != 0)
         throw std::runtime_error("Transcription failed");
@@ -121,6 +128,9 @@ ile::Whisper::transcrib_pcm(const float *data, int size, const std::string &lang
     int n = whisper_full_n_segments(ctx);
     for (int i = 0; i < n; ++i)
         result += whisper_full_get_segment_text(ctx, i);
+
+    auto finish = std::chrono::steady_clock::now();
+    fmt::println("whisper chunk finish: {}", finish - start);
 
     return result;
 }

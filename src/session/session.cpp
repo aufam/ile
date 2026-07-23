@@ -36,20 +36,24 @@ asio::awaitable<void> ile::Session::run() {
         } else {
             co_await handle_http(req);
         }
+    } catch (boost::system::system_error &e) {
+        if (e.code() == asio::error::basic_errors::operation_aborted)
+            fmt::println("Handler stopped.");
+        else
+            fmt::println("Handler error: {}", e.what());
     } catch (std::exception const &e) {
         std::cerr << "session error: " << e.what() << '\n';
     }
 }
 
 asio::awaitable<void> handle_chunk(
+    const ile::Cli                          &cli,
     std::shared_ptr<ws::stream<tcp::socket>> ws,
     beast::flat_buffer                       buffer,
     ile::Whisper                            &whisper,
     std::vector<float>                      &pcm_data,
     int                                     &cnt
 ) {
-    const auto buffer_size = buffer.size();
-
     std::string_view sv(static_cast<const char *>(buffer.data().data()), buffer.size());
 
     ile::AudioChunk chunk = {};
@@ -57,23 +61,13 @@ asio::awaitable<void> handle_chunk(
         cpx::protobuf::parse(sv, chunk);
     } catch (std::exception &e) {
         fmt::println("{}", e.what());
-        std::ignore = e;
+        co_return;
     }
 
-    const auto size = chunk.pcm.size();
-    const auto pcm  = chunk.pcm;
-    chunk.pcm       = "";
-    if (chunk.bits_per_sample)
-        try {
-            fmt::println("chunk={}, size={}, buffer_size={}", chunk, size, buffer_size);
-        } catch (std::exception &e) {
-            fmt::println("{}", e.what());
-        }
-
-    chunk.pcm = pcm;
-    auto res  = chunk.write_wav();
+    auto res = chunk.write_wav();
     if (res.is_err()) {
         fmt::println("write wav error: {}", res.error().what());
+        co_return;
     }
 
     auto chunk_f32 = chunk.to_pcm_f32();
@@ -84,8 +78,9 @@ asio::awaitable<void> handle_chunk(
     cnt++;
 
     if (cnt == 5) {
-        std::string res = whisper.transcrib_pcm(pcm_data.data(), (int)pcm_data.size());
-        fmt::println("Transcript: {}", res);
+        std::string res =
+            whisper.transcrib_pcm(pcm_data.data(), (int)pcm_data.size(), cli.language, cli.detect_language, cli.translate);
+        fmt::println("{}:{} {}", chunk.branch, chunk.counter, res);
         co_await ws->async_write(asio::buffer(res));
         cnt = 0;
     }
@@ -112,9 +107,8 @@ asio::awaitable<void> ile::Session::handle_websocket(const beast::http::request 
             throw;
         }
 
-        asio::co_spawn(
-            co_await asio::this_coro::executor, handle_chunk(ws, std::move(buffer), whisper, pcm_data, cnt), asio::detached
-        );
+        auto ctx = co_await asio::this_coro::executor;
+        asio::co_spawn(ctx, handle_chunk(cli, ws, std::move(buffer), whisper, pcm_data, cnt), asio::detached);
     }
 }
 
