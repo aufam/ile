@@ -1,6 +1,9 @@
 module;
 
 #include <miniaudio.h>
+#include <vector>
+#include <stdexcept>
+#include <iostream>
 
 module ile;
 

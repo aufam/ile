@@ -1,11 +1,12 @@
+module;
+
+#include "../boost.h"
+
 module ile;
 import fmt;
 import cpx.fmt;
 import cpx.protobuf;
 import cpx.yy_json;
-
-namespace http = beast::http;
-namespace ws   = beast::websocket;
 
 ile::Session::Session(tcp::socket socket, const ile::Cli &cli, Whisper &whisper)
     : socket(std::move(socket))
@@ -16,7 +17,7 @@ asio::awaitable<void> ile::Session::run() {
     auto _ = shared_from_this();
 
     beast::flat_buffer buffer;
-    http::request      req;
+    http_request       req;
     try {
         co_await http::async_read(socket, buffer, req);
 
@@ -42,7 +43,7 @@ asio::awaitable<void> ile::Session::run() {
         else
             fmt::println("Handler error: {}", e.what());
     } catch (std::exception const &e) {
-        std::cerr << "session error: " << e.what() << '\n';
+        fmt::println(stderr, "session error: {}", e.what());
     }
 }
 
@@ -86,7 +87,7 @@ asio::awaitable<void> handle_chunk(
     }
 }
 
-asio::awaitable<void> ile::Session::handle_websocket(const beast::http::request &req) {
+asio::awaitable<void> ile::Session::handle_websocket(const http_request &req) {
     auto ws = std::make_shared<ws::stream<tcp::socket>>(std::move(socket));
 
     co_await ws->async_accept(req);
@@ -112,8 +113,8 @@ asio::awaitable<void> ile::Session::handle_websocket(const beast::http::request 
     }
 }
 
-asio::awaitable<void> ile::Session::handle_http(const beast::http::request &req) {
-    http::response res;
+asio::awaitable<void> ile::Session::handle_http(const http_request &req) {
+    http_response res;
     res.version(req.version());
     res.set(http::field::server, "ile");
 

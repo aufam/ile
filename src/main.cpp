@@ -1,3 +1,7 @@
+module;
+
+#include "boost.h"
+
 module ile;
 import fmt;
 import cpx.cli11;
@@ -25,7 +29,7 @@ asio::awaitable<void> async_main(tcp::acceptor &acceptor, const ile::Cli &cli, i
 }
 
 asio::awaitable<void> async_terminate(tcp::acceptor &acceptor) {
-    asio::signal_set signals(co_await asio::this_coro::executor, asio::signals::sigint, asio::signals::sigterm);
+    asio::signal_set signals(co_await asio::this_coro::executor, SIGINT, SIGTERM);
 
     auto signal = co_await signals.async_wait();
     fmt::println("Got signal={}", signal);

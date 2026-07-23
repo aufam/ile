@@ -1,6 +1,8 @@
 module;
 
 #include <miniaudio.h>
+#include <string_view>
+#include <vector>
 
 module ile;
 

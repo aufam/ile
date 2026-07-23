@@ -1,8 +1,8 @@
+module;
+
+#include "../boost.h"
+
 export module ile:session;
-import :std;
-import :asio;
-import :beast;
-import :tcp;
 import :cli;
 import :whisper;
 
@@ -22,7 +22,7 @@ private:
     const Cli  &cli;
     Whisper    &whisper;
 
-    asio::awaitable<void> handle_websocket(const beast::http::request &req);
+    asio::awaitable<void> handle_websocket(const http_request &req);
 
-    asio::awaitable<void> handle_http(const beast::http::request &req);
+    asio::awaitable<void> handle_http(const http_request &req);
 };

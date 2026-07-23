@@ -1,5 +1,9 @@
+module;
+
+#include <string_view>
+#include <vector>
+
 export module ile:audio_chunk;
-import :std;
 import cpx;
 
 export namespace ile {

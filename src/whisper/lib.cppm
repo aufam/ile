@@ -1,7 +1,10 @@
+module;
+
+#include <string>
+#include "../fs.h"
+
 export module ile:whisper;
 import :audio_chunk;
-import :std;
-import :fs;
 
 export namespace ile {
     class Whisper;
