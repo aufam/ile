@@ -19,11 +19,11 @@ public:
         const std::string &path, const std::string &language = "auto", bool detect_language = false, bool translate = false
     );
 
-    std::string transcrib_chunk(
+    std::string transcribe_chunk(
         const AudioChunk &chunk, const std::string &language = "auto", bool detect_language = false, bool translate = false
     );
 
-    std::string transcrib_pcm(
+    std::string transcribe_pcm(
         const float *data, int size, const std::string &language = "auto", bool detect_language = false, bool translate = false
     );
 

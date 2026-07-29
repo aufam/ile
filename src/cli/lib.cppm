@@ -2,6 +2,7 @@ module;
 
 #include <string>
 #include <optional>
+#include <cstdint>
 
 export module ile:cli;
 import cpx;
@@ -11,35 +12,45 @@ export namespace ile {
 } // namespace ile
 
 struct ile::Cli {
-    int         port            = 5000;
-    std::string model           = "/home/aufa/whisper.cpp/models/ggml-base.bin";
-    std::string language        = "auto";
-    bool        detect_language = false;
-    bool        translate       = false;
+    struct Serve {
+        std::string host            = "0.0.0.0";
+        uint16_t    port            = 5000;
+        uint8_t     parallel        = 8;
+        std::string whisper_model   = "models/ggml-base.bin";
+        std::string language        = "auto";
+        bool        detect_language = false;
+        bool        translate       = false;
+
+        static constexpr std::tuple __field_tags__ = {
+            cpx::field<&Serve::port>            = "port,skipmissing,env=ILE_PORT",
+            cpx::field<&Serve::parallel>        = "parallel,short=j,skipmissing",
+            cpx::field<&Serve::whisper_model>   = "whisper-model,skipmissing,env=ILE_WHISPER_MODEL",
+            cpx::field<&Serve::language>        = "language,skipmissing,env=ILE_LANGUAGE",
+            cpx::field<&Serve::detect_language> = "detect-language",
+            cpx::field<&Serve::translate>       = "translate",
+        };
+    };
+    std::optional<Serve> serve;
 
     struct Transcribe {
         std::string file;
+        std::string whisper_model   = "models/ggml-base.bin";
+        std::string language        = "auto";
+        bool        detect_language = false;
+        bool        translate       = false;
 
         static constexpr std::tuple __field_tags__ = {
-            cpx::field<&Transcribe::file> = "file,positional",
+            cpx::field<&Transcribe::file>            = "file,positional",
+            cpx::field<&Transcribe::whisper_model>   = "whisper-model,skipmissing,env=ILE_WHISPER_MODEL",
+            cpx::field<&Transcribe::language>        = "language,skipmissing,env=ILE_LANGUAGE",
+            cpx::field<&Transcribe::detect_language> = "detect-language",
+            cpx::field<&Transcribe::translate>       = "translate",
         };
     };
     std::optional<Transcribe> transcribe;
 
-    struct Evaluate {
-        std::string ollama_host = "localhost";
-        int         ollama_port = 11434;
-
-        static constexpr std::tuple __field_tags__ = {
-            cpx::field<&Evaluate::ollama_host> = "host,skipmissing",
-            cpx::field<&Evaluate::ollama_port> = "port,skipmissing",
-        };
-    };
-    std::optional<Evaluate> evalueate;
-
     struct Record {
         std::string output_path;
-        void        record() const;
 
         static constexpr std::tuple __field_tags__ = {
             cpx::field<&Record::output_path> = "output,positional",
@@ -48,12 +59,8 @@ struct ile::Cli {
     std::optional<Record> record;
 
     static constexpr std::tuple __field_tags__ = {
-        cpx::field<&Cli::port>            = "port,skipmissing",
-        cpx::field<&Cli::model>           = "model,skipmissing",
-        cpx::field<&Cli::language>        = "language,skipmissing",
-        cpx::field<&Cli::detect_language> = "detect-language",
-        cpx::field<&Cli::translate>       = "translate",
-        cpx::field<&Cli::transcribe>      = "transcribe",
-        cpx::field<&Cli::record>          = "record",
+        cpx::field<&Cli::serve>      = "serve,help=Launch http server",
+        cpx::field<&Cli::transcribe> = "transcribe,help=Transcribe an audio file",
+        cpx::field<&Cli::record>     = "record,help=Record your voice",
     };
 };

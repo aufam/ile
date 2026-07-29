@@ -2,10 +2,12 @@ module;
 
 #include <array>
 #include <fstream>
+#include <chrono>
 #include "../fs.h"
 
 module ile;
 import cpx;
+import fmt;
 
 inline void write_u16(std::ostream &os, unsigned short v) {
     std::array<char, 2> b{
@@ -31,7 +33,12 @@ auto ile::AudioChunk::write_wav() const -> cpx::Result<void> {
     constexpr unsigned short block_align     = channels * bits_per_sample / 8;
     const unsigned int       byte_rate       = sample_rate * block_align;
 
-    const auto path = std::string(branch) + "-" + std::string(counter) + ".wav";
+    auto now = std::chrono::system_clock::now();
+
+    const auto path =
+        fmt::format(".audio/{:%Y-%m-%d}-{}-{}-{}.wav", std::chrono::floor<std::chrono::days>(now), branch, counter, client_id);
+
+    fs::create_directories(".audio");
 
     if (!fs::exists(path)) {
         std::ofstream os(path, std::ios::binary);

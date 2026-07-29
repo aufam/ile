@@ -1,15 +1,16 @@
 module;
 
 #include <miniaudio.h>
+#include <string>
 #include <vector>
 #include <stdexcept>
 #include <iostream>
 
 module ile;
 
-void record_wav(const char *outputFile) {
+void ile::Recorder::record() const {
     struct CaptureData {
-        std::vector<short> samples;
+        std::vector<int16_t> samples;
     } capture;
 
     ma_context context;
@@ -54,7 +55,7 @@ void record_wav(const char *outputFile) {
     ma_encoder_config encoderConfig = ma_encoder_config_init(ma_encoding_format_wav, ma_format_s16, 1, 16000);
 
     ma_encoder encoder;
-    if (ma_encoder_init_file(outputFile, &encoderConfig, &encoder) != MA_SUCCESS) {
+    if (ma_encoder_init_file(output_path.c_str(), &encoderConfig, &encoder) != MA_SUCCESS) {
         ma_device_uninit(&device);
         ma_context_uninit(&context);
         throw std::runtime_error("ma_encoder_init_file failed");
@@ -66,8 +67,4 @@ void record_wav(const char *outputFile) {
     ma_encoder_uninit(&encoder);
     ma_device_uninit(&device);
     ma_context_uninit(&context);
-}
-
-void ile::Cli::Record::record() const {
-    record_wav(output_path.c_str());
 }

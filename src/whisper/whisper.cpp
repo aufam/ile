@@ -74,7 +74,7 @@ ile::Whisper::transcribe_file(const std::string &path, const std::string &langua
 }
 
 std::string
-ile::Whisper::transcrib_chunk(const AudioChunk &chunk, const std::string &language, bool detect_language, bool translate) {
+ile::Whisper::transcribe_chunk(const AudioChunk &chunk, const std::string &language, bool detect_language, bool translate) {
     auto ctx = static_cast<whisper_context *>(this->ctx);
 
     whisper_full_params params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
@@ -104,7 +104,7 @@ float rms(const float *samples, int n) {
 }
 
 std::string
-ile::Whisper::transcrib_pcm(const float *data, int size, const std::string &language, bool detect_language, bool translate) {
+ile::Whisper::transcribe_pcm(const float *data, int size, const std::string &language, bool detect_language, bool translate) {
     auto ctx = static_cast<whisper_context *>(this->ctx);
 
     if (rms(data, size) < 0.02f)
