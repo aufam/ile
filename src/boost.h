@@ -1,5 +1,6 @@
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
+#include <boost/url.hpp>
 
 namespace asio  = boost::asio;
 namespace beast = boost::beast;

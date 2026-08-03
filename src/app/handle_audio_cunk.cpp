@@ -6,10 +6,9 @@ module ile;
 import fmt;
 import cpx.protobuf;
 
-asio::awaitable<void>
-ile::Session::handle_chunk(std::shared_ptr<ws_stream> stream, beast::flat_buffer buffer, std::vector<float> &pcm_data) {
-    auto _ = shared_from_this();
-
+asio::awaitable<void> ile::App::handle_audio_chunk(
+    std::shared_ptr<ws_stream> stream, beast::flat_buffer buffer, std::vector<float> &pcm_data, int &cnt
+) {
     std::string_view sv(static_cast<const char *>(buffer.data().data()), buffer.size());
 
     ile::AudioChunk chunk = {};
@@ -37,16 +36,22 @@ ile::Session::handle_chunk(std::shared_ptr<ws_stream> stream, beast::flat_buffer
     // Append new samples at the end.
     std::memcpy(pcm_data.data() + pcm_data.size() - chunk_size, chunk_f32.data(), chunk_size * sizeof(float));
 
-    std::string text = whisper.transcribe_pcm( //
-        pcm_data.data(),
-        (int)pcm_data.size(),
-        args.language,
-        args.detect_language,
-        args.translate
-    );
+    cnt++;
+    if (cnt == 5) {
+        std::string text = whisper.transcribe_pcm( //
+            pcm_data.data(),
+            (int)pcm_data.size(),
+            args.language,
+            args.detect_language,
+            args.translate
+        );
 
-    if (!text.empty()) {
-        fmt::println(stderr, "{}:{} {}", chunk.branch, chunk.counter, text);
-        co_await stream->async_write(asio::buffer(text));
+        if (!text.empty()) {
+            cnt = 0;
+            fmt::println(stderr, "{}:{} {}", chunk.branch, chunk.counter, text);
+            co_await stream->async_write(asio::buffer(text));
+        } else {
+            cnt--;
+        }
     }
 }

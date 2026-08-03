@@ -116,6 +116,7 @@ ile::Whisper::transcribe_pcm(const float *data, int size, const std::string &lan
     params.language            = language.c_str();
     params.detect_language     = detect_language;
     params.translate           = translate;
+    params.n_threads           = 8;
 
     auto init = std::chrono::steady_clock::now();
     fmt::println("whisper chunk init: {}", init - start);

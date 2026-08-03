@@ -5,7 +5,7 @@ module;
 module ile;
 import fmt;
 
-asio::awaitable<void> ile::Terminator::async_main() {
+asio::awaitable<void> ile::App::async_cancel() {
     asio::signal_set signals(co_await asio::this_coro::executor, SIGINT, SIGTERM);
 
     auto signal = co_await signals.async_wait();

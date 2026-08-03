@@ -5,18 +5,15 @@ module;
 module ile;
 import fmt;
 
-asio::awaitable<void> ile::Server::async_main() {
+asio::awaitable<void> ile::App::async_main() {
     auto io = co_await asio::this_coro::executor;
 
     fmt::println("Server is running on http://{}:{}", args.host, args.port);
 
     while (true) {
         try {
-            tcp::socket socket = co_await acceptor.async_accept();
-
-            auto session = std::make_shared<ile::Session>(std::move(socket), args, whisper, router);
-
-            asio::co_spawn(io, session->run(), asio::detached);
+            beast::tcp_stream stream(co_await acceptor.async_accept());
+            asio::co_spawn(io, router.handle(std::move(stream)), asio::detached);
         } catch (boost::system::system_error &e) {
             if (e.code() == asio::error::basic_errors::operation_aborted)
                 fmt::println("Acceptor stopped.");

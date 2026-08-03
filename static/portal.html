@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ILoveEmas - Gold & Jewelry Valuation System</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Cinzel:wght@600;700&display=swap"
+    rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            gold: {
+              50: '#fffbeb',
+              100: '#fef3c7',
+              200: '#fde68a',
+              300: '#fcd34d',
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+              700: '#b45309',
+              800: '#92400e',
+              900: '#78350f',
+            },
+            amberbrand: '#D4AF37',
+            slatebg: '#0F172A',
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            serif: ['Cinzel', 'serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbar and luxury styling enhancements */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #1e293b;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #d4af37;
+    }
+
+    .glass-panel {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .gold-gradient-text {
+      background: linear-gradient(135deg, #FFF099 0%, #D4AF37 50%, #AA7C11 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .gold-border-glow {
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.15);
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+
+      .print-only {
+        display: block !important;
+      }
+
+      body {
+        background: white !important;
+        color: black !important;
+      }
+    }
+  </style>
+</head>
+
+<body
+  class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-amber-500 selection:text-slate-950">
+
+  <!-- Top Navigation & Station Config Header -->
+  <header class="bg-slate-900/90 border-b border-slate-800 sticky top-0 z-30 backdrop-blur-md no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+
+        <!-- Brand Title -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div
+              class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 to-amber-300 p-0.5 flex items-center justify-center shadow-lg shadow-amber-500/10">
+              <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
+                <i class="fa-solid font-serif text-amber-400 text-xl font-bold">ILE</i>
+              </div>
+            </div>
+            <div>
+              <h1 class="font-serif font-bold text-lg text-slate-100 tracking-wide flex items-center gap-2">
+                ILoveEmas <span
+                  class="text-xs font-sans px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Station
+                  Portal</span>
+              </h1>
+              <p class="text-xs text-slate-400">Multi-Counter Jewelry Evaluation & Database Management</p>
+            </div>
+          </div>
+
+          <!-- Mobile Navigation Toggle -->
+          <button id="mobileMenuBtn" onclick="toggleMobileNav()"
+            class="lg:hidden p-2 text-slate-400 hover:text-amber-400">
+            <i class="fa-solid fa-bars text-xl"></i>
+          </button>
+        </div>
+
+        <!-- Station Context Settings (Branch, Counter, Staff) -->
+        <div
+          class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs bg-slate-950/80 p-2 rounded-xl border border-slate-800">
+          <div>
+            <label class="block text-slate-400 text-[10px] uppercase font-semibold tracking-wider mb-0.5"><i
+                class="fa-solid fa-code-branch text-amber-400 mr-1"></i>Branch</label>
+            <select id="stationBranch" onchange="updateStationContext()"
+              class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-slate-200 focus:border-amber-500 focus:outline-none">
+              <option value="Central Grand Branch">Central Grand Branch</option>
+              <option value="North Plaza Counter">North Plaza Counter</option>
+              <option value="Downtown Gold Exchange">Downtown Gold Exchange</option>
+              <option value="Westside Vault Hub">Westside Vault Hub</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-slate-400 text-[10px] uppercase font-semibold tracking-wider mb-0.5"><i
+                class="fa-solid fa-desktop text-amber-400 mr-1"></i>Counter</label>
+            <select id="stationCounter" onchange="updateStationContext()"
+              class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-slate-200 focus:border-amber-500 focus:outline-none">
+              <option value="Counter #01 - High Value">Counter #01 (High Value)</option>
+              <option value="Counter #02 - Rapid Scale">Counter #02 (Rapid Scale)</option>
+              <option value="Counter #03 - XRF Lab">Counter #03 (XRF Lab)</option>
+              <option value="Counter #04 - Gemstones">Counter #04 (Gemstones)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-slate-400 text-[10px] uppercase font-semibold tracking-wider mb-0.5"><i
+                class="fa-solid fa-user-gear text-amber-400 mr-1"></i>Staff Name</label>
+            <input type="text" id="stationStaff" value="Alex Rivera (Appraiser)" onchange="updateStationContext()"
+              class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-slate-200 focus:border-amber-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-slate-400 text-[10px] uppercase font-semibold tracking-wider mb-0.5"><i
+                class="fa-solid fa-calendar-day text-amber-400 mr-1"></i>Session Date</label>
+            <input type="date" id="stationDate" onchange="updateStationContext()"
+              class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-slate-200 focus:border-amber-500 focus:outline-none">
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav id="navTabs"
+        class="flex overflow-x-auto space-x-1 mt-3 pt-2 border-t border-slate-800/80 text-sm font-medium">
+        <button onclick="switchTab('queueTab')" id="tabBtn-queueTab"
+          class="nav-tab px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap bg-amber-500/10 text-amber-400 border border-amber-500/30">
+          <i class="fa-solid fa-users"></i> Queue & Active Tickets <span id="queueBadge"
+            class="bg-amber-500 text-slate-950 text-xs px-2 py-0.5 rounded-full font-bold">3</span>
+        </button>
+        <button onclick="switchTab('measurementTab')" id="tabBtn-measurementTab"
+          class="nav-tab px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap text-slate-400 hover:text-slate-200 hover:bg-slate-800/50">
+          <i class="fa-solid fa-scale-balanced"></i> Item Measurement & XRF
+        </button>
+        <button onclick="switchTab('customerReportTab')" id="tabBtn-customerReportTab"
+          class="nav-tab px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap text-slate-400 hover:text-slate-200 hover:bg-slate-800/50">
+          <i class="fa-solid fa-file-invoice-dollar"></i> Customer Live Presentation
+        </button>
+        <button onclick="switchTab('databaseTab')" id="tabBtn-databaseTab"
+          class="nav-tab px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap text-slate-400 hover:text-slate-200 hover:bg-slate-800/50">
+          <i class="fa-solid fa-database"></i> Database & Payload Inspector
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+
+    <!-- Toast Notifications Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+    <!-- ==================== TAB 1: QUEUE MANAGER & ACTIVE TICKETS ==================== -->
+    <section id="queueTab" class="tab-content block space-y-6">
+
+      <!-- Action Header & New Ticket Modal Trigger -->
+      <div
+        class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-xl">
+        <div>
+          <h2 class="text-xl font-bold text-slate-100 flex items-center gap-2">
+            <i class="fa-solid fa-clipboard-list text-amber-400"></i> Active Customer Queue
+          </h2>
+          <p class="text-sm text-slate-400 mt-1">Staff across different counters can pick up, measure, and append
+            jewelry items to any queue number seamlessly.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <button onclick="openNewCustomerModal()"
+            class="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-semibold rounded-xl shadow-lg shadow-amber-500/20 transition flex items-center gap-2">
+            <i class="fa-solid fa-plus"></i> New Queue Ticket
+          </button>
+        </div>
+      </div>
+
+      <!-- Queue Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="queueGrid">
+        <!-- Injected via JavaScript -->
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: ITEM MEASUREMENT & APPRASIAL ==================== -->
+    <section id="measurementTab" class="tab-content hidden space-y-6">
+
+      <!-- Active Selected Ticket Bar -->
+      <div id="activeTicketBanner"
+        class="bg-gradient-to-r from-amber-950/40 via-slate-900 to-slate-900 p-4 rounded-2xl border border-amber-500/30 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <div
+            class="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-bold text-lg"
+            id="activeQueueDisplayNumber">
+            Q-001
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="font-bold text-lg text-slate-100" id="activeCustomerDisplayName">Customer: Loading...</h3>
+              <span id="activeTicketStatusBadge"
+                class="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">In
+                Measurement</span>
+            </div>
+            <p class="text-xs text-slate-400 flex items-center gap-3 mt-0.5">
+              <span><i class="fa-solid fa-tag text-slate-500 mr-1"></i>Ticket ID: <span id="activeTicketIdDisplay"
+                  class="font-mono text-slate-300">#---</span></span>
+              <span><i class="fa-solid fa-clock text-slate-500 mr-1"></i>Started today</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="switchTab('queueTab')"
+            class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
+            <i class="fa-solid fa-arrow-left"></i> Switch Queue
+          </button>
+          <button onclick="switchTab('customerReportTab')"
+            class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
+            <i class="fa-solid fa-eye"></i> View Live Presentation
+          </button>
+        </div>
+      </div>
+
+      <!-- Two Column Layout: Items List vs Device Measurement Input Form -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left Column: Add / Edit Item Measurement Form -->
+        <div class="lg:col-span-7 bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl space-y-6">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div>
+              <h3 class="font-bold text-lg text-slate-100 flex items-center gap-2">
+                <i class="fa-solid fa-microscope text-amber-400"></i> Device Measurement Input
+              </h3>
+              <p class="text-xs text-slate-400">Capture photos and input scale & spectrometry values for this item.</p>
+            </div>
+            <span id="formModeLabel"
+              class="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-full font-medium">Adding Item #1</span>
+          </div>
+
+          <form id="measurementForm" onsubmit="handleSaveItem(event)" class="space-y-5">
+            <input type="hidden" id="editingItemId" value="">
+
+            <!-- Item Description / Title -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                Item Description / Title <span class="text-amber-400">*</span>
+              </label>
+              <input type="text" id="itemTitle" required placeholder="e.g. 18K Yellow Gold Diamond Solitaire Ring"
+                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none transition">
+            </div>
+
+            <!-- 3-Photo Station Matrix: Jewelry Photo, Scale Photo, XRF Spectrometer Photo -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                <i class="fa-solid fa-camera text-amber-400 mr-1"></i> Device Verification Photos
+              </label>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+
+                <!-- Photo 1: Item Overview -->
+                <div
+                  class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex flex-col items-center justify-between">
+                  <span class="text-[11px] font-semibold text-slate-400 mb-2 flex items-center gap-1">
+                    <i class="fa-solid fa-gem text-amber-400"></i> 1. Item Photo
+                  </span>
+                  <div
+                    class="w-full h-32 rounded-lg bg-slate-900 border border-dashed border-slate-700 flex items-center justify-center overflow-hidden relative group"
+                    id="photo1PreviewBox">
+                    <img id="photo1Preview" src="" class="w-full h-full object-cover hidden">
+                    <div id="photo1Placeholder" class="text-center p-2">
+                      <i class="fa-solid fa-image text-slate-600 text-2xl mb-1"></i>
+                      <p class="text-[10px] text-slate-500">Overview Photo</p>
+                    </div>
+                  </div>
+                  <div class="mt-2.5 w-full flex gap-1">
+                    <label
+                      class="flex-1 text-center bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] py-1.5 px-2 rounded cursor-pointer transition">
+                      <i class="fa-solid fa-upload mr-1"></i>Upload
+                      <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'photo1')">
+                    </label>
+                    <button type="button" onclick="presetSampleImage('photo1', 'jewelry')"
+                      class="bg-slate-800 hover:bg-amber-500/20 hover:text-amber-300 text-slate-400 text-[11px] px-2 py-1.5 rounded transition"
+                      title="Load Sample Preset">
+                      <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Photo 2: Weighing Scale Photo -->
+                <div
+                  class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex flex-col items-center justify-between">
+                  <span class="text-[11px] font-semibold text-slate-400 mb-2 flex items-center gap-1">
+                    <i class="fa-solid fa-weight-scale text-amber-400"></i> 2. Scale Reading
+                  </span>
+                  <div
+                    class="w-full h-32 rounded-lg bg-slate-900 border border-dashed border-slate-700 flex items-center justify-center overflow-hidden relative group"
+                    id="photo2PreviewBox">
+                    <img id="photo2Preview" src="" class="w-full h-full object-cover hidden">
+                    <div id="photo2Placeholder" class="text-center p-2">
+                      <i class="fa-solid fa-scale-unbalanced text-slate-600 text-2xl mb-1"></i>
+                      <p class="text-[10px] text-slate-500">Weighing Display</p>
+                    </div>
+                  </div>
+                  <div class="mt-2.5 w-full flex gap-1">
+                    <label
+                      class="flex-1 text-center bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] py-1.5 px-2 rounded cursor-pointer transition">
+                      <i class="fa-solid fa-upload mr-1"></i>Upload
+                      <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'photo2')">
+                    </label>
+                    <button type="button" onclick="presetSampleImage('photo2', 'scale')"
+                      class="bg-slate-800 hover:bg-amber-500/20 hover:text-amber-300 text-slate-400 text-[11px] px-2 py-1.5 rounded transition"
+                      title="Load Sample Preset">
+                      <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Photo 3: XRF Spectrometer Photo -->
+                <div
+                  class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex flex-col items-center justify-between">
+                  <span class="text-[11px] font-semibold text-slate-400 mb-2 flex items-center gap-1">
+                    <i class="fa-solid fa-atom text-amber-400"></i> 3. XRF Readout
+                  </span>
+                  <div
+                    class="w-full h-32 rounded-lg bg-slate-900 border border-dashed border-slate-700 flex items-center justify-center overflow-hidden relative group"
+                    id="photo3PreviewBox">
+                    <img id="photo3Preview" src="" class="w-full h-full object-cover hidden">
+                    <div id="photo3Placeholder" class="text-center p-2">
+                      <i class="fa-solid fa-chart-line text-slate-600 text-2xl mb-1"></i>
+                      <p class="text-[10px] text-slate-500">Purity Analysis</p>
+                    </div>
+                  </div>
+                  <div class="mt-2.5 w-full flex gap-1">
+                    <label
+                      class="flex-1 text-center bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] py-1.5 px-2 rounded cursor-pointer transition">
+                      <i class="fa-solid fa-upload mr-1"></i>Upload
+                      <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'photo3')">
+                    </label>
+                    <button type="button" onclick="presetSampleImage('photo3', 'xrf')"
+                      class="bg-slate-800 hover:bg-amber-500/20 hover:text-amber-300 text-slate-400 text-[11px] px-2 py-1.5 rounded transition"
+                      title="Load Sample Preset">
+                      <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Numerical Measurement Metrics -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+
+              <!-- Weight in Grams -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  Weight (Grams) <span class="text-amber-400">*</span>
+                </label>
+                <div class="relative">
+                  <input type="number" step="0.01" min="0" id="itemWeight" required oninput="calculateItemTotal()"
+                    placeholder="0.00"
+                    class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-4 pr-10 py-2 text-sm text-slate-100 font-mono focus:border-amber-500 focus:outline-none">
+                  <span class="absolute right-3 top-2.5 text-xs font-semibold text-slate-500">g</span>
+                </div>
+              </div>
+
+              <!-- Carat / Karat Purity -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  Purity / Carat (K) <span class="text-amber-400">*</span>
+                </label>
+                <div class="flex gap-2">
+                  <input type="number" step="0.1" min="0" max="24" id="itemCarat" required
+                    oninput="calculateItemTotal()" placeholder="e.g. 18.0"
+                    class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm text-slate-100 font-mono focus:border-amber-500 focus:outline-none">
+                  <select onchange="applyCaratPreset(this.value)"
+                    class="bg-slate-800 text-xs border border-slate-700 rounded-xl px-2 text-slate-300 focus:outline-none">
+                    <option value="">Preset</option>
+                    <option value="24">24K (99.9%)</option>
+                    <option value="22">22K (91.6%)</option>
+                    <option value="18">18K (75.0%)</option>
+                    <option value="14">14K (58.5%)</option>
+                    <option value="10">10K (41.7%)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Price Per Gram -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  Price Per Gram ($ / g) <span class="text-amber-400">*</span>
+                </label>
+                <div class="relative">
+                  <span class="absolute left-3 top-2.5 text-xs font-semibold text-slate-500">$</span>
+                  <input type="number" step="0.01" min="0" id="itemPricePerGram" required oninput="calculateItemTotal()"
+                    placeholder="0.00"
+                    class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-8 pr-4 py-2 text-sm text-slate-100 font-mono focus:border-amber-500 focus:outline-none">
+                </div>
+              </div>
+
+              <!-- Calculated Total Offer Price -->
+              <div>
+                <label class="block text-xs font-semibold text-amber-400 uppercase tracking-wider mb-1">
+                  Item Calculated Offer ($)
+                </label>
+                <div class="relative">
+                  <span class="absolute left-3 top-2.5 text-xs font-bold text-amber-500">$</span>
+                  <input type="number" step="0.01" id="itemTotalPrice" readonly placeholder="0.00"
+                    class="w-full bg-slate-900/90 border border-amber-500/40 rounded-xl pl-8 pr-4 py-2 text-base text-amber-300 font-bold font-mono focus:outline-none">
+                </div>
+              </div>
+            </div>
+
+            <!-- Form Action Buttons -->
+            <div class="flex items-center justify-between pt-2">
+              <button type="button" onclick="resetMeasurementForm()"
+                class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium transition">
+                <i class="fa-solid fa-rotate-left mr-1"></i> Clear Form
+              </button>
+              <button type="submit"
+                class="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-xl shadow-lg shadow-amber-500/20 text-sm transition flex items-center gap-2">
+                <i class="fa-solid fa-circle-plus"></i> <span id="saveItemBtnText">Save Item to Ticket</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Right Column: Current Queue Items List & Grand Total Summary -->
+        <div class="lg:col-span-5 flex flex-col gap-5">
+
+          <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl flex-1 flex flex-col">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
+              <div>
+                <h3 class="font-bold text-slate-100 flex items-center gap-2">
+                  <i class="fa-solid fa-layer-group text-amber-400"></i> Attached Jewelry Items
+                </h3>
+                <p class="text-xs text-slate-400">Items recorded under current queue ticket</p>
+              </div>
+              <span id="itemsCountBadge"
+                class="text-xs font-bold px-2.5 py-1 bg-slate-800 text-amber-400 rounded-full border border-slate-700">0
+                items</span>
+            </div>
+
+            <!-- Items List Container -->
+            <div id="itemsContainer" class="space-y-3 flex-1 overflow-y-auto max-h-[480px] pr-1">
+              <!-- Items injected dynamically -->
+            </div>
+
+            <!-- Queue Total Offer Calculation Banner -->
+            <div class="mt-5 pt-4 border-t border-slate-800 bg-slate-950/80 p-4 rounded-xl border border-amber-500/20">
+              <div class="flex justify-between items-center text-xs text-slate-400 mb-1">
+                <span>Total Net Weight:</span>
+                <span id="summaryTotalWeight" class="font-mono text-slate-200 font-semibold">0.00 g</span>
+              </div>
+              <div class="flex justify-between items-center text-sm font-bold text-slate-100">
+                <span>Total Valuation Offer:</span>
+                <span id="summaryGrandTotal" class="font-mono text-xl text-amber-400">$0.00</span>
+              </div>
+              <button onclick="switchTab('customerReportTab')"
+                class="w-full mt-3 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs uppercase tracking-wider transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-file-signature"></i> Open Customer Presentation
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: CUSTOMER LIVE PRESENTATION & CERTIFICATE ==================== -->
+    <section id="customerReportTab" class="tab-content hidden space-y-6">
+
+      <!-- Controls Header -->
+      <div
+        class="flex flex-wrap items-center justify-between gap-4 bg-slate-900 p-4 rounded-2xl border border-slate-800 no-print">
+        <div class="flex items-center gap-3">
+          <span class="p-2 bg-amber-500/10 text-amber-400 rounded-lg text-lg"><i class="fa-solid fa-desktop"></i></span>
+          <div>
+            <h2 class="font-bold text-slate-100">Customer Appraisal Certificate & Presentation View</h2>
+            <p class="text-xs text-slate-400">High-resolution breakdown designed to show on the counter screen or export
+              as print receipt.</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button onclick="window.print()"
+            class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl transition flex items-center gap-2">
+            <i class="fa-solid fa-print"></i> Print Appraisal Certificate
+          </button>
+          <button onclick="openSignatureModal()"
+            class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold rounded-xl shadow-lg shadow-amber-500/20 transition flex items-center gap-2">
+            <i class="fa-solid fa-pen-nib"></i> Customer Sign & Accept
+          </button>
+        </div>
+      </div>
+
+      <!-- Customer Facing Certificate Board -->
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden"
+        id="printableCertificate">
+
+        <!-- Watermark Background Logo -->
+        <div
+          class="absolute -right-16 -bottom-16 opacity-5 pointer-events-none text-amber-400 font-serif text-[240px] font-bold">
+          ILE
+        </div>
+
+        <!-- Certificate Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-6 gap-6">
+          <div>
+            <div class="flex items-center gap-3 mb-1">
+              <span class="font-serif text-amber-400 text-3xl font-bold tracking-wider">ILoveEmas</span>
+              <span
+                class="text-xs uppercase tracking-widest font-bold px-2.5 py-1 bg-amber-500/10 text-amber-300 border border-amber-500/30 rounded-md">Valuation
+                Receipt</span>
+            </div>
+            <p class="text-xs text-slate-400" id="reportBranchAddress">Central Grand Branch • Gold & Precious Metals
+              Evaluation Lab</p>
+          </div>
+
+          <div class="text-left sm:text-right text-xs text-slate-400 space-y-1">
+            <p><strong class="text-slate-200">Queue Ticket:</strong> <span id="reportQueueNo"
+                class="font-mono text-amber-400 font-bold">Q-001</span></p>
+            <p><strong class="text-slate-200">Date & Time:</strong> <span id="reportDate">2026-07-30</span></p>
+            <p><strong class="text-slate-200">Appraiser / Staff:</strong> <span id="reportStaff">Alex Rivera</span></p>
+            <p><strong class="text-slate-200">Customer Name:</strong> <span id="reportCustomer"
+                class="text-slate-100 font-semibold">John Doe</span></p>
+          </div>
+        </div>
+
+        <!-- Items Breakdown Detailed Cards -->
+        <div class="py-8 space-y-6">
+          <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+            <i class="fa-solid fa-list-check text-amber-400"></i> Jewelry Measurement Breakdown
+          </h3>
+
+          <div id="reportItemsList" class="space-y-6">
+            <!-- Items rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Customer Valuation Summary Footer Banner -->
+        <div
+          class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 p-6 rounded-2xl border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div>
+            <span class="text-xs text-slate-400 uppercase tracking-widest block mb-1">Total Valuation Offer</span>
+            <div class="flex items-baseline gap-3">
+              <span id="reportGrandTotal"
+                class="text-3xl sm:text-4xl font-extrabold text-amber-400 font-mono">$0.00</span>
+              <span id="reportItemCountSummary" class="text-xs text-slate-400">(0 items assessed)</span>
+            </div>
+          </div>
+
+          <!-- Signature Area -->
+          <div
+            class="border-t sm:border-t-0 sm:border-l border-slate-800 pt-4 sm:pt-0 sm:pl-8 text-center sm:text-right flex flex-col items-center sm:items-end">
+            <div id="signatureDisplay"
+              class="h-16 w-48 border border-dashed border-slate-700 rounded-lg flex items-center justify-center bg-slate-950/60 overflow-hidden mb-1">
+              <span class="text-xs text-slate-600 italic">Pending Signature</span>
+            </div>
+            <p class="text-[11px] text-slate-400">Customer Acceptance Signature</p>
+          </div>
+        </div>
+
+        <!-- Terms Footer -->
+        <div class="mt-8 pt-4 border-t border-slate-800/60 text-[10px] text-slate-500 text-center leading-relaxed">
+          Disclaimer: All gold weights and purity measurements (XRF Spectrometry) were conducted in the presence of the
+          customer. Prices are calculated based on today's official spot market exchange rate. Upon signing, payment
+          will be issued instantly to the designated customer account.
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: DATABASE & PAYLOAD INSPECTOR ==================== -->
+    <section id="databaseTab" class="tab-content hidden space-y-6">
+
+      <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-6">
+
+        <!-- Section Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+              <i class="fa-solid fa-database text-amber-400"></i> Database Management & API Struct Inspector
+            </h2>
+            <p class="text-xs text-slate-400">View stored customer ticket records and real-time backend API payload
+              matching C++ struct definitions.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="simulatePostRequest()"
+              class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl transition flex items-center gap-2 shadow-lg shadow-emerald-600/20">
+              <i class="fa-solid fa-paper-plane"></i> Simulate POST /api/appraisals
+            </button>
+            <button onclick="renderDatabaseTable()"
+              class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-xl transition">
+              <i class="fa-solid fa-rotate mr-1"></i> Refresh
+            </button>
+          </div>
+        </div>
+
+        <!-- Data Table View -->
+        <div class="overflow-x-auto rounded-xl border border-slate-800">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-950 text-slate-400 uppercase text-[10px] font-semibold tracking-wider">
+              <tr>
+                <th class="p-3">Queue No</th>
+                <th class="p-3">Customer</th>
+                <th class="p-3">Branch & Counter</th>
+                <th class="p-3">Staff</th>
+                <th class="p-3">Date</th>
+                <th class="p-3">Items Count</th>
+                <th class="p-3">Total Value</th>
+                <th class="p-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="databaseTableBody" class="divide-y divide-slate-800/60 bg-slate-900/50 font-mono">
+              <!-- Table rows injected dynamically -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Struct JSON Payload Inspector -->
+        <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-code text-slate-500"></i> Live C++ Data Struct JSON Payload
+            </span>
+            <button onclick="copyJsonPayload()"
+              class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded transition">
+              <i class="fa-solid fa-copy mr-1"></i> Copy JSON
+            </button>
+          </div>
+          <pre id="jsonInspector"
+            class="p-4 bg-slate-900 rounded-lg text-emerald-400 font-mono text-xs overflow-x-auto max-h-80 border border-slate-800/80">
+            // Select or edit a customer ticket to inspect live struct JSON
+          </pre>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- Modal 1: Create New Customer Queue Ticket -->
+  <div id="newCustomerModal"
+    class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div
+      class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in duration-150">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-slate-100 text-base flex items-center gap-2">
+          <i class="fa-solid fa-user-plus text-amber-400"></i> Create New Customer Ticket
+        </h3>
+        <button onclick="closeNewCustomerModal()" class="text-slate-400 hover:text-slate-200">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleCreateNewTicket(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Queue Number</label>
+          <input type="text" id="newQueueNo" required
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-sm font-mono text-amber-400 font-bold focus:border-amber-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Customer Full
+            Name</label>
+          <input type="text" id="newCustomerName" required placeholder="e.g. Eleanor Vance"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-sm text-slate-100 focus:border-amber-500 focus:outline-none">
+        </div>
+
+        <div class="flex justify-end gap-3 pt-3">
+          <button type="button" onclick="closeNewCustomerModal()"
+            class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium">Cancel</button>
+          <button type="submit"
+            class="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs shadow-lg shadow-amber-500/20">
+            Create & Open Ticket
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 2: Customer Digital Signature Pad -->
+  <div id="signatureModal"
+    class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-slate-100 text-base flex items-center gap-2">
+          <i class="fa-solid fa-signature text-amber-400"></i> Customer Authorization Signature
+        </h3>
+        <button onclick="closeSignatureModal()" class="text-slate-400 hover:text-slate-200">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-400">Please have the customer sign below to authorize the jewelry trade-in offer
+        valuation.</p>
+
+      <div class="border border-slate-700 rounded-xl bg-slate-950 p-2 flex flex-col items-center">
+        <canvas id="signatureCanvas" width="440" height="180"
+          class="w-full h-44 bg-slate-950 rounded cursor-crosshair border border-slate-800/80"></canvas>
+      </div>
+
+      <div class="flex items-center justify-between">
+        <button type="button" onclick="clearSignatureCanvas()"
+          class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs">
+          <i class="fa-solid fa-eraser mr-1"></i> Clear Pad
+        </button>
+        <div class="flex gap-2">
+          <button type="button" onclick="closeSignatureModal()"
+            class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium">Cancel</button>
+          <button type="button" onclick="saveSignature()"
+            class="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs shadow-lg shadow-amber-500/20">
+            Save Signature
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== APPLICATION SCRIPT ==================== -->
+  <script src="portal.js" defer></script>
+</body>
+
+</html>

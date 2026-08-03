@@ -1,12 +1,15 @@
 module;
 
 #include "boost.h"
+#include <laserpants/dotenv/dotenv.h>
 
 module ile;
 import fmt;
 import cpx.cli11;
 
 extern "C++" int main(int argc, char **argv) {
+    dotenv::init();
+
     const auto cli = cpx::cli11::parse<ile::Cli>("ile", argc, argv);
 
     if (const auto &c = cli.record; c.has_value()) {
@@ -23,22 +26,17 @@ extern "C++" int main(int argc, char **argv) {
         return 0;
     }
 
-    asio::io_context io;
-    tcp::acceptor    acceptor(io);
-
     const auto args  = cli.serve.value_or(ile::Cli::Serve{});
     const auto nproc = args.parallel;
+    ile::App   app(args);
 
-    ile::Server     app(args, acceptor);
-    ile::Terminator cancel = {acceptor};
-
-    asio::co_spawn(io, app.async_main(), asio::detached);
-    asio::co_spawn(io, cancel.async_main(), asio::detached);
+    asio::co_spawn(app.io, app.async_main(), asio::detached);
+    asio::co_spawn(app.io, app.async_cancel(), asio::detached);
 
     std::vector<std::thread> ts;
     ts.reserve(nproc);
     for (uint8_t i = 0; i < nproc; ++i)
-        ts.emplace_back([&]() { io.run(); });
+        ts.emplace_back([&]() { app.io.run(); });
 
     for (uint8_t i = 0; i < nproc; ++i)
         ts[i].join();
