@@ -38,20 +38,20 @@ asio::awaitable<void> ile::App::handle_audio_chunk(
 
     cnt++;
     if (cnt == 5) {
-        std::string text = whisper.transcribe_pcm( //
-            pcm_data.data(),
-            (int)pcm_data.size(),
-            args.language,
-            args.detect_language,
-            args.translate
-        );
+        // std::string text = whisper.transcribe_pcm( //
+        //     pcm_data.data(),
+        //     (int)pcm_data.size(),
+        //     args.language,
+        //     args.detect_language,
+        //     args.translate
+        // );
 
-        if (!text.empty()) {
-            cnt = 0;
-            fmt::println(stderr, "{}:{} {}", chunk.branch, chunk.counter, text);
-            co_await stream->async_write(asio::buffer(text));
-        } else {
-            cnt--;
-        }
+        // if (!text.empty()) {
+        //     cnt = 0;
+        //     fmt::println(stderr, "{}:{} {}", chunk.branch, chunk.counter, text);
+        //     co_await stream->async_write(asio::buffer(text));
+        // } else {
+        cnt--;
+        // }
     }
 }

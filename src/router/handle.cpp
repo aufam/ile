@@ -27,7 +27,6 @@ asio::awaitable<void> ile::Router::handle(beast::tcp_stream stream) const {
             );
 
             if (ws::is_upgrade(req)) {
-                fmt::println(stderr, "DEBUG: {}", "upgrade");
                 co_await handle_ws(stream, req);
                 co_return;
             } else {
@@ -39,13 +38,22 @@ asio::awaitable<void> ile::Router::handle(beast::tcp_stream stream) const {
             }
         }
     } catch (boost::system::system_error &e) {
+        fmt::print(stderr, "[{}:{}] ", remote.address().to_string(), remote.port());
         if (e.code() == asio::error::operation_aborted)
-            fmt::println(stderr, "[{}:{}] session aborted.", remote.address().to_string(), remote.port());
+            fmt::println(stderr, "session aborted.");
         else if (e.code() == http::error::end_of_stream)
-            fmt::println(stderr, "[{}:{}] end of stream.", remote.address().to_string(), remote.port());
+            fmt::println(stderr, "end of stream.");
+        else if (e.code() == asio::error::connection_reset)
+            fmt::println(stderr, "reset by peer.");
+        else if (e.code() == asio::error::eof)
+            fmt::println(stderr, "eof.");
+        else if (e.code() == asio::error::broken_pipe)
+            fmt::println(stderr, "broken pipe.");
+        else if (e.code() == asio::error::connection_aborted)
+            fmt::println(stderr, "connection aborted.");
         else
-            fmt::println(stderr, "session error: {}", e.what());
+            fmt::println(stderr, "unknown error: {}", e.what());
     } catch (std::exception const &e) {
-        fmt::println(stderr, "session error: {}", e.what());
+        fmt::println(stderr, "[{}:{}] uncaught error: {}", remote.address().to_string(), remote.port(), e.what());
     }
 }

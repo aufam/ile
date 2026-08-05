@@ -38,7 +38,7 @@ ile::App::App(const ile::Cli::Serve &args)
                 co_await ss->async_read(buffer);
             } catch (boost::system::system_error &e) {
                 if (e.code() == ws::error::closed) {
-                    fmt::println(stderr, "closed");
+                    fmt::println(stderr, "ws closed");
                     break;
                 }
                 throw;

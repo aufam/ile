@@ -3,11 +3,33 @@ module;
 #include <filesystem>
 #include <map>
 #include <unordered_map>
+#include <xxhash.h>
 #include "../boost.h"
 
 module ile;
 import fmt;
 namespace fs = std::filesystem;
+
+std::string file_etag(std::string const &path) {
+    std::ifstream f(path, std::ios::binary);
+    if (!f)
+        return {};
+
+    XXH3_state_t *state = XXH3_createState();
+    XXH3_128bits_reset(state);
+
+    std::array<char, 8192> buf;
+    while (f.read(buf.data(), buf.size()) || f.gcount())
+        XXH3_128bits_update(state, buf.data(), f.gcount());
+
+    auto hash = XXH3_128bits_digest(state);
+    XXH3_freeState(state);
+
+    char etag[33];
+    snprintf(etag, sizeof(etag), "%016llx%016llx", (unsigned long long)hash.high64, (unsigned long long)hash.low64);
+
+    return std::string("\"") + etag + "\"";
+}
 
 std::string_view mime_type(fs::path const &p) {
     auto ext = p.extension().string();
@@ -113,10 +135,25 @@ asio::awaitable<bool> ile::Router::handle_http(beast::tcp_stream &stream, const 
         if (ec)
             co_return false; // TODO
 
+        auto etag = file_etag(path);
+
+        if (auto it = req.find(http::field::if_none_match); it != req.end() && it->value() == etag) {
+            http::response<http::empty_body> res{http::status::not_modified, req.version()};
+            res.set(http::field::server, "ile");
+            res.set(http::field::etag, etag);
+            res.set(http::field::cache_control, "public, max-age=31536000, immutable");
+            res.keep_alive(req.keep_alive());
+
+            co_await http::async_write(stream, res);
+            co_return true;
+        }
+
         http::response<http::file_body> res;
         res.version(req.version());
         res.set(http::field::server, "ile");
         res.set(http::field::content_type, mime_type(path));
+        res.set(http::field::etag, etag);
+        res.set(http::field::cache_control, "public, max-age=31536000, immutable");
         res.content_length(body.size());
         res.keep_alive(req.keep_alive());
         res.body() = std::move(body);
