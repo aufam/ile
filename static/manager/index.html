@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ILoveEmas - Branch Manager Portal</title>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="ile-app">
+
+  <!-- ==================== BRANCH MANAGER LOGIN PAGE ==================== -->
+  <div id="managerLoginPage" class="login-page-container">
+    <div class="login-backdrop-glow"></div>
+
+    <div class="login-card-wrapper">
+      <!-- Header / Logo -->
+      <div class="login-brand-header">
+        <div class="login-logo-circle">
+          <div class="login-logo-inner">ILE</div>
+        </div>
+        <h1 class="login-title">ILoveEmas <span class="login-title-badge">Branch Manager</span></h1>
+        <p class="login-subtitle">Valuation Database & Item Management Portal</p>
+      </div>
+
+      <!-- Manager Login Form (Form with ONLY Branch Name) -->
+      <form id="managerLoginForm" onsubmit="handleManagerLogin(event)" class="login-form">
+        <!-- Branch Field -->
+        <div class="login-field-group">
+          <label for="loginBranch" class="login-label">
+            <i class="fa-solid fa-building-user"></i> Select Branch Location <span class="required-star">*</span>
+          </label>
+          <div class="input-with-icon">
+            <select id="loginBranch" class="login-input" required>
+              <option value="Jakarta Barat">Jakarta Barat (Headquarters)</option>
+              <option value="Tanjung Barat">Tanjung Barat Branch</option>
+              <option value="Artha Gading">Artha Gading Mall Branch</option>
+              <option value="Surabaya Central">Surabaya Central Branch</option>
+              <option value="Bandung Hub">Bandung Hub Station</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Options / Checkbox -->
+        <div class="login-options-row">
+          <label class="login-checkbox-label">
+            <input type="checkbox" id="loginRemember" checked>
+            <span>Remember branch session on this browser</span>
+          </label>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="login-submit-btn">
+          <i class="fa-solid fa-right-to-bracket"></i> Launch Manager Portal
+        </button>
+      </form>
+
+      <!-- Footer Info -->
+      <div class="login-footer">
+        <i class="fa-solid fa-shield-halved"></i> Branch Manager Authorization • ILoveEmas System
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Navigation & Branch Manager Header -->
+  <header id="mainHeader" class="ile-header no-print hidden">
+    <div class="ile-header-inner">
+      <div class="ile-header-row">
+
+        <!-- Brand Title -->
+        <div class="ile-brand-block">
+          <div class="ile-brand-left">
+            <div class="ile-logo">
+              <div class="ile-logo-inner">ILE</div>
+            </div>
+            <div>
+              <h1 class="ile-brand-title">
+                ILoveEmas <span class="ile-brand-badge">Branch Manager</span>
+              </h1>
+              <p class="ile-brand-subtitle">Branch Database, Item Management & Valuation Certificates</p>
+            </div>
+          </div>
+
+          <!-- Mobile Navigation Toggle -->
+          <button id="mobileMenuBtn" onclick="toggleMobileNav()" class="ile-mobile-menu-btn no-print" style="display:none;">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+        </div>
+
+        <!-- Station Context Settings (Uneditable Display Elements) -->
+        <div class="station-grid">
+          <div>
+            <label class="station-field-label"><i class="fa-solid fa-building"></i>Manager Branch</label>
+            <div id="managerBranch" class="station-display-value">Jakarta Barat</div>
+          </div>
+
+          <div>
+            <label class="station-field-label"><i class="fa-solid fa-user-shield"></i>Role</label>
+            <div class="station-display-value">Branch Manager</div>
+          </div>
+
+          <div>
+            <label class="station-field-label"><i class="fa-solid fa-calendar-day"></i>Session Date</label>
+            <input type="date" id="managerDate" class="station-date-input" onchange="handleDateChange(this.value)" title="Switch session date">
+          </div>
+
+          <div class="station-action-cell">
+            <button type="button" onclick="handleManagerLogout()" class="station-switch-btn" title="Switch Branch Session">
+              <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav id="navTabs" class="ile-nav-tabs">
+        <button onclick="switchTab('databaseTab')" id="tabBtn-databaseTab" class="ile-nav-tab active">
+          <i class="fa-solid fa-database"></i> Database & Payload Inspector
+        </button>
+        <button onclick="switchTab('itemsTab')" id="tabBtn-itemsTab" class="ile-nav-tab">
+          <i class="fa-solid fa-boxes-stacked"></i> Inventory & Items Manager
+        </button>
+        <button onclick="switchTab('customerReportTab')" id="tabBtn-customerReportTab" class="ile-nav-tab">
+          <i class="fa-solid fa-file-certificate"></i> Appraiser Certificates & Print Portal
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main id="mainContent" class="ile-main hidden">
+
+    <!-- Toast Notifications Container -->
+    <div id="toastContainer" class="ile-toast-container"></div>
+
+    <!-- ==================== TAB 1: DATABASE & PAYLOAD INSPECTOR ==================== -->
+    <section id="databaseTab" class="tab-content">
+      <div class="ile-panel">
+
+        <!-- Section Header & Toolbar -->
+        <div class="ile-panel-header">
+          <div>
+            <h2 class="ile-panel-title">
+              <i class="fa-solid fa-database"></i> Database Management & API Struct Inspector
+            </h2>
+            <p class="ile-panel-subtitle">View stored branch customer tickets, manage appraisal statuses, print certificates, and inspect C++ JSON backend payload.</p>
+          </div>
+          <div class="db-toolbar">
+            <input type="text" id="dbSearchInput" placeholder="Search customer, queue no..." oninput="handleDatabaseSearch(this.value)" class="db-search-input">
+            
+            <select id="dbStatusSelect" onchange="filterDatabaseByStatus(this.value)" class="db-select-filter">
+              <option value="ALL">All Statuses</option>
+              <option value="In Measurement">In Measurement</option>
+              <option value="Approved">Approved</option>
+              <option value="Completed">Completed</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+
+            <button onclick="simulatePostRequest()" class="btn-form-primary btn-emerald">
+              <i class="fa-solid fa-paper-plane"></i> Simulate POST /api/manager/appraisals
+            </button>
+            <button onclick="renderDatabaseTable()" class="btn-form-secondary">
+              <i class="fa-solid fa-rotate"></i> Refresh
+            </button>
+          </div>
+        </div>
+
+        <!-- Data Table View -->
+        <div class="db-table-wrapper">
+          <table class="db-table">
+            <thead>
+              <tr>
+                <th>Queue No</th>
+                <th>Customer</th>
+                <th>Branch & Counter</th>
+                <th>Staff/Appraiser</th>
+                <th>Date</th>
+                <th>Items Count</th>
+                <th>Total Value</th>
+                <th>Status</th>
+                <th class="text-right-cell">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="databaseTableBody">
+              <!-- Dynamically injected via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Struct JSON Payload Inspector -->
+        <div class="json-inspector-panel">
+          <div class="json-inspector-header">
+            <span class="json-inspector-title">
+              <i class="fa-solid fa-code"></i> Live C++ Data Struct JSON Payload Inspector
+            </span>
+            <button onclick="copyJsonPayload()" class="json-copy-btn">
+              <i class="fa-solid fa-copy"></i> Copy Struct JSON
+            </button>
+          </div>
+          <pre id="jsonInspector" class="json-inspector-body">
+// Select a customer ticket from the database table to inspect live struct JSON
+          </pre>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: INVENTORY & ITEMS MANAGER ==================== -->
+    <section id="itemsTab" class="tab-content hidden">
+      <div class="ile-panel">
+        <div class="ile-panel-header">
+          <div>
+            <h2 class="ile-panel-title">
+              <i class="fa-solid fa-boxes-stacked"></i> Jewelry Items Inventory & Audit
+            </h2>
+            <p class="ile-panel-subtitle">Manage individual gold & jewelry items recorded across branch evaluation counters.</p>
+          </div>
+        </div>
+
+        <div id="managerItemsGrid" class="manager-items-grid">
+          <!-- Items injected dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: APPRAISER CERTIFICATE & PRINT PORTAL ==================== -->
+    <section id="customerReportTab" class="tab-content hidden">
+
+      <!-- Controls Header -->
+      <div class="certificate-controls no-print" style="margin-bottom: 1.5rem;">
+        <div>
+          <h2 style="font-size: 1.1rem; font-weight: 700; color: var(--slate-100);">
+            <i class="fa-solid fa-file-certificate" style="color: var(--amber-400);"></i> Official Appraiser Valuation Certificate
+          </h2>
+          <p class="ile-panel-subtitle">Official valuation document with XRF assay metrics, photos, and digital acceptance signature.</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <span id="reportStatusBadge" class="status-chip chip-emerald">Approved</span>
+          <button onclick="window.print()" class="btn-form-primary">
+            <i class="fa-solid fa-print"></i> Print Appraisal Certificate
+          </button>
+        </div>
+      </div>
+
+      <!-- Printable Certificate Board -->
+      <div class="certificate-board" id="printableCertificate">
+
+        <!-- Watermark Background Logo -->
+        <div class="certificate-watermark">ILE</div>
+
+        <!-- Certificate Header -->
+        <div class="certificate-header">
+          <div>
+            <div class="certificate-brand-row">
+              <span class="certificate-brand-name">ILoveEmas</span>
+              <span class="certificate-brand-tag">Valuation Certificate</span>
+            </div>
+            <p class="certificate-branch-addr" id="reportBranchAddress">Jakarta Barat Branch • Gold & Precious Metals Evaluation Lab</p>
+          </div>
+
+          <div class="certificate-meta">
+            <p><strong>Queue Ticket:</strong> <span id="reportQueueNo" class="highlight">Q-001</span></p>
+            <p><strong>Date & Time:</strong> <span id="reportDate">2026-08-07</span></p>
+            <p><strong>Appraiser / Staff:</strong> <span id="reportStaff">Jane Doe (Appraiser)</span></p>
+            <p><strong>Customer Name:</strong> <span id="reportCustomer">Budi Santoso</span></p>
+          </div>
+        </div>
+
+        <!-- Items Breakdown Cards -->
+        <div>
+          <h3 class="certificate-items-heading">
+            <i class="fa-solid fa-list-check"></i> Jewelry Measurement & XRF Assay Breakdown
+          </h3>
+
+          <div id="reportItemsList">
+            <!-- Items rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Valuation Summary Banner -->
+        <div class="certificate-total-banner">
+          <div>
+            <span class="certificate-total-label">Total Net Valuation Offer</span>
+            <div style="display: flex; align-items: baseline; gap: 0.75rem;">
+              <span id="reportGrandTotal" class="certificate-total-value">Rp0</span>
+              <span id="reportItemCountSummary" style="font-size: 0.85rem; color: #94a3b8;">(0 items assessed)</span>
+            </div>
+          </div>
+
+          <!-- Signature Display Area -->
+          <div>
+            <div id="signatureDisplay" class="signature-display-box">
+              <span style="font-size: 0.75rem; color: #64748b;">Pending Signature</span>
+            </div>
+            <p class="signature-caption">Customer Acceptance Signature</p>
+          </div>
+        </div>
+
+        <!-- Manager Audit Note Footer -->
+        <div style="margin-top: 1.25rem; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.375rem; padding: 0.75rem; font-size: 0.775rem;">
+          <strong style="color: #1e293b;">Branch Manager Audit Note:</strong>
+          <span id="reportManagerNotes" style="color: #475569; margin-left: 0.375rem;">Verified by Branch Manager.</span>
+        </div>
+
+        <!-- Terms Footer -->
+        <div class="certificate-footer-note">
+          Disclaimer: All gold weights and purity measurements (XRF Spectrometry) were conducted in the presence of the customer. Prices are calculated based on today's official spot market exchange rate. Upon signing, payment is issued instantly to the designated customer account.
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== STATUS MANAGEMENT MODAL ==================== -->
+  <div id="manageStatusModal" class="ile-modal-backdrop hidden">
+    <div class="ile-modal-box">
+      <div class="ile-modal-header">
+        <h3 class="ile-modal-title">
+          <i class="fa-solid fa-list-check"></i> Manage Ticket Status
+        </h3>
+        <button onclick="closeManageStatusModal()" class="ile-modal-close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleSaveStatusUpdate(event)">
+        <div class="modal-field">
+          <h4 id="modalTicketTitle" style="font-size: 0.95rem; color: var(--slate-100);">Manage Queue Ticket</h4>
+          <p id="modalCustomerInfo" style="font-size: 0.8rem; color: var(--slate-400); margin-top: 0.25rem;">Customer Info</p>
+        </div>
+
+        <div class="modal-field">
+          <label for="modalTicketStatusSelect">Appraisal Status <span class="required-star">*</span></label>
+          <select id="modalTicketStatusSelect" class="modal-select" required>
+            <option value="In Measurement">In Measurement</option>
+            <option value="Approved">Approved (Ready for Payout)</option>
+            <option value="Completed">Completed (Paid Out)</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+        </div>
+
+        <div class="modal-field">
+          <label for="modalManagerNotes">Branch Manager Audit Notes</label>
+          <textarea id="modalManagerNotes" class="modal-textarea" rows="3" placeholder="Enter audit or approval notes..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" onclick="closeManageStatusModal()" class="btn-form-secondary">
+            Cancel
+          </button>
+          <button type="submit" class="btn-form-primary">
+            <i class="fa-solid fa-floppy-disk"></i> Save Status Update
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/config.js" defer></script>
+  <script src="js/state.js" defer></script>
+  <script src="js/toast.js" defer></script>
+  <script src="js/auth.js" defer></script>
+  <script src="js/database.js" defer></script>
+  <script src="js/items.js" defer></script>
+  <script src="js/presentation.js" defer></script>
+  <script src="js/modals.js" defer></script>
+  <script src="js/tabs.js" defer></script>
+  <script src="js/main.js" defer></script>
+
+</body>
+
+</html>

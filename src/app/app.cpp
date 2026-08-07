@@ -4,6 +4,7 @@ module;
 
 module ile;
 import fmt;
+import cpx.protobuf;
 
 ile::App::App(const ile::Cli::Serve &args)
     : args(args)
@@ -28,14 +29,11 @@ ile::App::App(const ile::Cli::Serve &args)
     router.mounts["/"] = "static";
 
     router.ws_handlers["/audio"] = [this](const http_request &, ws_stream stream) -> asio::awaitable<void> {
-        auto ss       = std::make_shared<ws_stream>(std::move(stream));
-        auto pcm_data = std::vector<float>();
-        int  cnt      = 0;
-        while (true) {
+        while (is_running) {
             beast::flat_buffer buffer;
 
             try {
-                co_await ss->async_read(buffer);
+                co_await stream.async_read(buffer);
             } catch (boost::system::system_error &e) {
                 if (e.code() == ws::error::closed) {
                     fmt::println(stderr, "ws closed");
@@ -44,8 +42,25 @@ ile::App::App(const ile::Cli::Serve &args)
                 throw;
             }
 
-            auto ctx = co_await asio::this_coro::executor;
-            asio::co_spawn(ctx, handle_audio_chunk(ss, std::move(buffer), pcm_data, cnt), asio::detached);
+            std::string_view sv(static_cast<const char *>(buffer.data().data()), buffer.size());
+            if (sv == "done") {
+                // TODO
+                co_return;
+            }
+
+            ile::AudioChunk chunk = {};
+            try {
+                cpx::protobuf::parse(sv, chunk);
+            } catch (std::exception &e) {
+                fmt::println(stderr, "{}:{}: parse error: {}", chunk.branch, chunk.counter, e.what());
+                co_return;
+            }
+
+            auto res = chunk.write_wav();
+            if (res.is_err()) {
+                fmt::println(stderr, "{}:{}: write wav error: {}", chunk.branch, chunk.counter, res.error().what());
+                co_return;
+            }
         }
     };
 }

@@ -8,6 +8,7 @@ module;
 
 module ile;
 import fmt;
+import cpx;
 namespace fs = std::filesystem;
 
 std::string file_etag(std::string const &path) {
@@ -53,28 +54,28 @@ std::string_view mime_type(fs::path const &p) {
     return "application/octet-stream";
 }
 
-std::string match_filepath(std::string mounted_root, std::string mounted_path) {
+std::pair<std::string, bool> match_filepath(const std::string &root_str, const std::string &path_str) {
     std::error_code ec;
 
-    fs::path root = fs::weakly_canonical(mounted_root, ec);
+    fs::path root = fs::weakly_canonical(root_str, ec);
     if (ec)
-        return "";
+        return {};
 
-    fs::path path = fs::weakly_canonical(root / mounted_path, ec);
+    fs::path path = fs::weakly_canonical(root / path_str, ec);
     if (ec)
-        return "";
+        return {};
 
     auto rel = path.lexically_relative(root);
     if (rel.empty() || rel.native().starts_with(".."))
-        return "";
+        return {};
 
     if (!fs::exists(path))
-        return "";
+        return {};
 
-    if (fs::is_directory(path))
-        path /= "index.html";
+    if (!fs::is_directory(path))
+        return {path.string(), false};
 
-    return path.string();
+    return {path.string(), true};
 }
 
 std::variant<ile::Router::HttpHandler, std::string> match_uri(
@@ -82,26 +83,36 @@ std::variant<ile::Router::HttpHandler, std::string> match_uri(
     const std::map<std::string, std::string>                        &mounts,
     const http_request                                              &req
 ) {
-    auto target = req.target();
-    auto path   = std::string(target.substr(0, target.find('?')));
+    const auto target = req.target();
+    const auto uri    = std::string(target.substr(0, target.find('?')));
 
-    auto key = std::string(req.method_string()) + " " + path;
+    auto key = std::string(req.method_string()) + " " + uri;
     auto it  = handlers.find(key);
     if (it != handlers.end())
         return it->second;
 
-    key = path;
+    key = uri;
     it  = handlers.find(key);
     if (it != handlers.end())
         return it->second;
 
     if (req.method_string() == "GET") {
-        for (auto &[root, mounted_root] : mounts) {
-            if (path.starts_with(root)) {
-                auto res = match_filepath(mounted_root, path.substr(root.size()));
-                if (!res.empty())
-                    return std::move(res);
-            }
+        for (const auto &[root, fs_root] : mounts) {
+            if (!uri.starts_with(root))
+                continue;
+
+            auto [path, redirect] = match_filepath(fs_root, uri.substr(root.size()));
+            if (path.empty())
+                continue;
+
+            if (!redirect)
+                return std::move(path);
+
+            return [uri = uri + "/index.html"](const http_request &, http_response &res) -> asio::awaitable<void> {
+                res.result(http::status::moved_permanently);
+                res.set(http::field::location, uri);
+                co_return;
+            };
         }
     }
 
@@ -114,52 +125,63 @@ std::variant<ile::Router::HttpHandler, std::string> match_uri(
     };
 }
 
-asio::awaitable<bool> ile::Router::handle_http(beast::tcp_stream &stream, const http_request &req) const {
-    auto h = match_uri(http_handlers, mounts, req);
-    if (auto ph = std::get_if<ile::Router::HttpHandler>(&h)) {
-        http_response res;
-        res.version(req.version());
-        res.set(http::field::server, "ile");
-        res.keep_alive(req.keep_alive());
+asio::awaitable<bool>
+ile::Router::handle_http(const std::string &remote_name, beast::tcp_stream &stream, const http_request &req) const {
 
-        co_await (*ph)(req, res);
+    co_await cpx::visit(
+        match_uri(http_handlers, mounts, req),
 
-        res.prepare_payload();
-        co_await http::async_write(stream, res);
-    } else {
-        auto &path = std::get<std::string>(h);
+        [&](ile::Router::HttpHandler fn) -> asio::awaitable<void> {
+            http_response res;
+            res.version(req.version());
+            res.keep_alive(req.keep_alive());
+            res.set(http::field::server, "ile");
 
-        beast::error_code           ec;
-        http::file_body::value_type body;
-        body.open(path.c_str(), beast::file_mode::scan, ec);
-        if (ec)
-            co_return false; // TODO
+            co_await fn(req, res);
+            res.prepare_payload();
 
-        auto etag = file_etag(path);
+            fmt::println(stderr, "[{}] {} {}", remote_name, res.result_int(), res.reason());
+            co_await http::async_write(stream, res);
+        },
 
-        if (auto it = req.find(http::field::if_none_match); it != req.end() && it->value() == etag) {
-            http::response<http::empty_body> res{http::status::not_modified, req.version()};
+        [&](std::string path) -> asio::awaitable<void> {
+            beast::error_code           ec;
+            http::file_body::value_type body;
+            body.open(path.c_str(), beast::file_mode::scan, ec);
+            if (ec)
+                co_return; // TODO
+
+            const auto etag = file_etag(path);
+            if (auto it = req.find(http::field::if_none_match); it != req.end() && it->value() == etag) {
+                http_response_empty res;
+                res.version(req.version());
+                res.keep_alive(req.keep_alive());
+                res.result(http::status::not_modified);
+                res.set(http::field::server, "ile");
+                res.set(http::field::etag, etag);
+                res.set(http::field::cache_control, "no-cache");
+
+                fmt::println(stderr, "[{}] {} {}", remote_name, res.result_int(), res.reason());
+
+                co_await http::async_write(stream, res);
+                co_return;
+            }
+
+            http::response<http::file_body> res;
+            res.version(req.version());
+            res.keep_alive(req.keep_alive());
+            res.result(http::status::ok);
             res.set(http::field::server, "ile");
             res.set(http::field::etag, etag);
-            res.set(http::field::cache_control, "public, max-age=31536000, immutable");
-            res.keep_alive(req.keep_alive());
+            res.set(http::field::content_type, mime_type(path));
+            res.set(http::field::cache_control, "no-cache");
+            res.content_length(body.size());
+            res.body() = std::move(body);
 
+            fmt::println(stderr, "[{}] {} {}", remote_name, res.result_int(), res.reason());
             co_await http::async_write(stream, res);
-            co_return true;
         }
-
-        http::response<http::file_body> res;
-        res.version(req.version());
-        res.set(http::field::server, "ile");
-        res.set(http::field::content_type, mime_type(path));
-        res.set(http::field::etag, etag);
-        res.set(http::field::cache_control, "public, max-age=31536000, immutable");
-        res.content_length(body.size());
-        res.keep_alive(req.keep_alive());
-        res.body() = std::move(body);
-
-        co_await http::async_write(stream, res);
-    }
+    );
 
     co_return req.keep_alive();
 }

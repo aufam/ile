@@ -1,5 +1,7 @@
 module;
 
+#include <atomic>
+#include <unordered_map>
 #include "../boost.h"
 
 export module ile:app;
@@ -25,7 +27,7 @@ private:
     tcp::acceptor     acceptor;
     Whisper           whisper;
     Router            router;
+    std::atomic_bool &is_running = router.is_running;
 
-    asio::awaitable<void>
-    handle_audio_chunk(std::shared_ptr<ws_stream> stream, beast::flat_buffer buffer, std::vector<float> &pcm_data, int &cnt);
+    std::unordered_map<std::string, std::vector<std::string>> branches;
 };

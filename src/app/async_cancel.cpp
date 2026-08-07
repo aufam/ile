@@ -12,7 +12,9 @@ asio::awaitable<void> ile::App::async_cancel() {
     fmt::println(stderr, "Got signal={}", signal);
 
     try {
+        is_running = false;
         acceptor.close();
+        router.close_all_streams();
     } catch (boost::system::system_error &e) {
         fmt::println(stderr, "Failed to close acceptor: {}", e.what());
     }

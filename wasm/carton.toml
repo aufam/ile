@@ -1,0 +1,30 @@
+#:schema https://raw.githubusercontent.com/aufam/carton/main/carton-schema.json
+
+[profile.dev]
+name = "dev-wasm"
+cxx = "~/emscripten/em++"
+c = "~/emscripten/emcc"
+arch = ""
+
+[profile.release]
+name = "release-wasm"
+cxx = "~/emscripten/em++"
+c = "~/emscripten/emcc"
+arch = ""
+
+[package]
+edition = 23
+version = "0.1.0"
+name = "ile-wasm"
+
+[dependencies]
+emscripten = {
+    path = "emscripten/system",
+    flags = ["public:-Wno-unused-parameter", "public:-Wno-reorder-ctor"],
+}
+whisper = {
+    version = "1.9.1",
+    features = ["ggml/wasm"],
+    default-features = true,
+}
+miniaudio = "0.11.25"
