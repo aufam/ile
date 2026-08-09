@@ -13,16 +13,16 @@ ile::Router::handle_ws(const std::string &remote_name, beast::tcp_stream stream,
     if (it == ws_handlers.end())
         co_return;
 
-    ws_stream ws(std::move(stream.socket()));
+    auto ws = std::make_shared<ws_stream>(std::move(stream.socket()));
     {
         std::unique_lock<std::mutex> lock(this->mtx);
-        this->ws_streams[remote_name] = &ws;
+        this->ws_streams[remote_name] = ws;
     }
     cpx::defer _ = [&]() {
         std::unique_lock<std::mutex> lock(this->mtx);
         this->ws_streams.erase(remote_name);
     };
 
-    co_await ws.async_accept(req);
-    co_await it->second(req, std::move(ws));
+    co_await ws->async_accept(req);
+    co_await it->second(req, ws);
 }

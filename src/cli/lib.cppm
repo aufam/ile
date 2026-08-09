@@ -20,7 +20,7 @@ struct ile::Cli {
         std::string language        = "auto";
         bool        detect_language = false;
         bool        translate       = false;
-        std::string branches        = "static/branches.toml";
+        std::string offices         = "static/offices.toml";
         std::string db              = "static/database.db";
 
         static constexpr std::tuple __field_tags__ = {

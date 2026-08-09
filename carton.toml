@@ -1,20 +1,20 @@
 [package]
 name = "ile"
 version = "0.1"
-edition = 26
+edition = 23
 
 [dependencies]
 fmt = "12.1.0"
 boost = { version = "1.89.0", features = ["url"], }
 cpx = {
     version = "0.1.0",
-    features = ["fmt", "cli", "json", "protobuf"],
+    features = ["fmt", "cli", "json", "toml", "protobuf", "sqlite"],
 }
 whisper = {
     version = "1.9.1",
     features = [
         "ggml/cpu",
-        # "ggml/blas", "ggml/metal" # only for mac
+        "ggml/blas", "ggml/metal" # only for mac
     ],
 }
 miniaudio = "0.11.25"

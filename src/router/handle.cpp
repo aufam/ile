@@ -64,8 +64,8 @@ asio::awaitable<void> ile::Router::handle(beast::tcp_stream stream) const {
 }
 
 void ile::Router::close_all_streams() const {
-    std::vector<beast::tcp_stream *> tcp_streams_to_close;
-    std::vector<ws_stream *>         ws_streams_to_close;
+    std::vector<beast::tcp_stream *>        tcp_streams_to_close;
+    std::vector<std::shared_ptr<ws_stream>> ws_streams_to_close;
 
     {
         std::scoped_lock lock(mtx);
@@ -78,6 +78,6 @@ void ile::Router::close_all_streams() const {
     for (auto *stream : tcp_streams_to_close)
         stream->close();
 
-    for (auto *stream : ws_streams_to_close)
+    for (auto stream : ws_streams_to_close)
         stream->next_layer().close();
 }
