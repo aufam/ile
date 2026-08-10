@@ -63,5 +63,28 @@ private:
 
     std::unordered_map<std::string, Office> offices;
 
-    std::unordered_map<std::string, std::vector<std::shared_ptr<ws_stream>>> states;
+    struct Room {
+        std::string office, counter, date;
+
+        bool operator==(const Room &other) const {
+            return office == other.office && counter == other.counter && date == other.date;
+        }
+    };
+    struct RoomHash {
+        size_t operator()(const Room &room) const {
+            size_t h1 = std::hash<std::string>{}(room.office);
+            size_t h2 = std::hash<std::string>{}(room.counter);
+            size_t h3 = std::hash<std::string>{}(room.date);
+
+            return h1 ^ (h2 << 1) ^ (h3 << 2);
+        }
+    };
+    std::unordered_map<Room, std::vector<std::shared_ptr<ws_stream>>, RoomHash> rooms;
+
+    asio::awaitable<void> broadcast(const Room &room);
+
+    void api_offices();
+    void api_tickets();
+    void api_items();
+    void api_states();
 };

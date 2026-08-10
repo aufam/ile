@@ -14,10 +14,10 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   // Render initial queue grid
-  renderQueueGrid();
+  // renderQueueGrid();
 
   // Load initial active ticket into measurement station
-  loadActiveTicket(activeTicketId);
+  loadActiveTicket();
 
   // Initialize canvas for digital signature
   initSignatureCanvas();

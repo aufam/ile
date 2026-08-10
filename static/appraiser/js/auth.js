@@ -1,13 +1,52 @@
 // ==================== APPRAISER AUTHENTICATION & SESSION MANAGEMENT ====================
+function updateCounters() {
+  const branchSelect = document.getElementById("loginBranch");
+  const counterSelect = document.getElementById("loginCounter");
+  const selectedOffice = branchSelect.value; counterSelect.innerHTML = "";
+  if (!selectedOffice) {
+    counterSelect.innerHTML = '<option value="" disabled selected>Select an office first</option>';
+    return;
+  }
+  // The office data returned by /api/offices contains `counters`. 
+  // // Example: ["Counter #1", "Counter #2", "Counter #3"] 
+  const office = window.offices[selectedOffice];
+  if (!office || !office.counters) {
+    counterSelect.innerHTML = '<option value="" disabled selected>No counters available</option>';
+    return;
+  }
 
-const APPRAISER_SESSION_KEY = 'ile_appraiser_session';
+  for (const counter of office.counters) {
+    const option = document.createElement("option");
+    option.value = counter;
+    option.textContent = counter;
+    counterSelect.appendChild(option);
+  }
+}
 
-let currentAppraiser = {
-  branch: 'Jakarta Barat',
-  counter: 'Counter #01',
-  name: 'Jane Doe (Appraiser)',
-  date: new Date().toISOString().split('T')[0]
-};
+document.getElementById("loginBranch").addEventListener("change", updateCounters);
+
+async function initializeLoginForm() {
+  try {
+    const response = await fetch("/api/offices");
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    window.offices = await response.json();
+    const branchSelect = document.getElementById("loginBranch");
+    branchSelect.innerHTML = "";
+    for (const [id, office] of Object.entries(window.offices)) {
+      const option = document.createElement("option");
+      option.value = id;
+      option.textContent = office.name; branchSelect.appendChild(option);
+    }
+    updateCounters();
+  } catch (error) {
+    console.error("Failed to load offices:", error);
+    document.getElementById("loginBranch").innerHTML = '<option value="" disabled selected>Failed to load offices</option>';
+    document.getElementById("loginCounter").innerHTML = '<option value="" disabled selected>Unable to load counters</option>';
+  }
+}
+initializeLoginForm();
 
 function initAuthSession() {
   const savedSession = localStorage.getItem(APPRAISER_SESSION_KEY);
@@ -40,6 +79,24 @@ function handleAppraiserLogin(event) {
   const name = document.getElementById('loginAppraiserName').value.trim();
   const date = new Date().toISOString().split('T')[0]; // Date is automatically today
   const remember = document.getElementById('loginRemember') ? document.getElementById('loginRemember').checked : true;
+
+  const select = document.querySelector('.preset-select');
+  const pricelist = window.offices[branch].pricelist;
+
+  select.innerHTML = '<option value="">Preset</option>';
+
+  for (const item of pricelist) {
+    const option = document.createElement('option');
+
+    // `value` is the pricelist type.
+    option.value = item.type;
+
+    // Display the type and price.
+    option.textContent =
+      `${item.type} - Rp ${item.price.toLocaleString('id-ID')}`;
+
+    select.appendChild(option);
+  }
 
   if (!name) {
     if (typeof showToast === 'function') {
@@ -117,10 +174,13 @@ function showMainApp() {
   if (loginPage) loginPage.classList.add('hidden');
   if (mainHeader) mainHeader.classList.remove('hidden');
   if (mainContent) mainContent.classList.remove('hidden');
+
+  connectStateWebSocket();
 }
 
 function handleAppraiserLogout() {
   localStorage.removeItem(APPRAISER_SESSION_KEY);
+  disconnectStateWebSocket();
   showLoginPage();
   if (typeof showToast === 'function') {
     showToast('Appraiser logged out');

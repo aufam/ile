@@ -60,8 +60,76 @@ let ticketsData = [
   //   ]
   // }
 ];
+let stateWebSocket;
+let shouldReconnect = true;
 
-let activeTicketId = "ticket-101";
+const APPRAISER_SESSION_KEY = 'ile_appraiser_session';
+
+let currentAppraiser = {
+  branch: '',
+  counter: '',
+  name: '',
+  date: new Date().toISOString().split('T')[0]
+};
+
+function connectStateWebSocket() {
+  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+
+  stateWebSocket = new WebSocket(
+    `${protocol}//${window.location.host}/ws/state` +
+    `?office=${encodeURIComponent(currentAppraiser.branch)}` +
+    `&counter=${encodeURIComponent(currentAppraiser.counter)}` +
+    `&date=${encodeURIComponent(currentAppraiser.date)}`
+  );
+
+  stateWebSocket.onopen = () => {
+    console.log("Connected to /ws/state");
+  };
+
+  stateWebSocket.onmessage = (event) => {
+    console.log("Got message from /ws/state");
+
+    const len = ticketsData.length;
+
+    ticketsData = JSON.parse(event.data);
+
+    if (ticketsData.length > len) {
+      activeTicketId = ticketsData[0].id;
+
+      closeNewCustomerModal();
+      loadActiveTicket();
+      switchTab('measurementTab');
+      // showToast(`Created Queue Ticket ${qNo} for ${cName}`);
+    }
+
+    renderActiveTicketItems();
+    renderQueueGrid();
+  };
+
+  stateWebSocket.onclose = () => {
+    console.log("Disconnected from /ws/state");
+
+    if (shouldReconnect) {
+      setTimeout(connectStateWebSocket, 1000);
+    }
+  };
+
+  stateWebSocket.onerror = (error) => {
+    console.error("WebSocket error:", error);
+    stateWebSocket.close();
+  };
+}
+
+function disconnectStateWebSocket() {
+  shouldReconnect = false;
+
+  if (stateWebSocket) {
+    stateWebSocket.close();
+    stateWebSocket = null;
+  }
+}
+
+let activeTicketId;
 
 // Current Form Image State (Base64 / Data URIs)
 let currentPhoto1 = "";

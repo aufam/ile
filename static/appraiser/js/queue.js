@@ -83,21 +83,29 @@ function getTicketStatusStyle(status) {
 function selectAndWorkOnTicket(ticketId) {
   activeTicketId = ticketId;
   renderQueueGrid();
-  loadActiveTicket(ticketId);
+  loadActiveTicket();
   switchTab('measurementTab');
   showToast("Queue ticket selected for station processing.");
 }
 
-function deleteTicket(ticketId) {
+async function deleteTicket(ticketId) {
   if (ticketsData.length <= 1) {
     showToast("Cannot delete the only remaining queue ticket.");
     return;
   }
-  ticketsData = ticketsData.filter(t => t.id !== ticketId);
-  if (activeTicketId === ticketId) {
-    activeTicketId = ticketsData[0].id;
-    loadActiveTicket(activeTicketId);
+
+  const response = await fetch(
+    `/api/tickets?id=${ticketId}` +
+    `&office=${encodeURIComponent(currentAppraiser.branch)}` +
+    `&counter=${encodeURIComponent(currentAppraiser.counter)}` +
+    `&date=${encodeURIComponent(currentAppraiser.date)}`
+    ,
+    { method: 'DELETE' }
+  );
+
+  if (!response.ok) {
+    showToast(`Delete failed: ${response.status}`);
+  } else {
+    showToast("Queue ticket removed.");
   }
-  renderQueueGrid();
-  showToast("Queue ticket removed.");
 }

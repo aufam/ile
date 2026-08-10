@@ -26,6 +26,8 @@ asio::awaitable<void> ile::Router::handle(beast::tcp_stream stream) const {
 
     try {
         while (is_running) {
+            buffer.clear();
+            req = {};
             co_await http::async_read(stream, buffer, req);
 
             fmt::println(stderr, "[{}] {} {}", remote_name, req.method_string(), req.target());

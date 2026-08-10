@@ -9,7 +9,7 @@ function closeNewCustomerModal() {
   document.getElementById('newCustomerModal').classList.add('hidden');
 }
 
-function handleCreateNewTicket(e) {
+async function handleCreateNewTicket(e) {
   e.preventDefault();
   const qNo = document.getElementById('newQueueNo').value;
   const cName = document.getElementById('newCustomerName').value;
@@ -20,25 +20,37 @@ function handleCreateNewTicket(e) {
     return el.value !== undefined && el.value !== '' ? el.value : (el.textContent || '');
   };
 
-  const newTicket = {
-    id: `ticket-${Date.now()}`,
-    branch: getStationVal('stationBranch'),
-    counter: getStationVal('stationCounter'),
-    staff_name: getStationVal('stationStaff'),
-    customer_name: cName,
-    customer_queue_number: qNo,
-    date: getStationVal('stationDate'),
-    status: "In Measurement",
-    signature: null,
-    items: []
-  };
+  const response = await fetch(
+    `/api/tickets` +
+    `?office=${encodeURIComponent(currentAppraiser.branch)}` +
+    `&counter=${encodeURIComponent(currentAppraiser.counter)}` +
+    `&date=${encodeURIComponent(currentAppraiser.date)}`
+    ,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        staff_name: getStationVal('stationStaff'),
+        customer_name: cName,
+        customer_queue_number: qNo,
+        status: "In Measurement",
+      })
+    },
+  );
 
-  ticketsData.unshift(newTicket);
-  activeTicketId = newTicket.id;
-
-  renderQueueGrid();
-  loadActiveTicket(newTicket.id);
   closeNewCustomerModal();
-  switchTab('measurementTab');
-  showToast(`Created Queue Ticket ${qNo} for ${cName}`);
+  if (!response.ok) {
+    showToast(`Failed to add a new ticket: ${response.status}`);
+  } else {
+    showToast(`Posted Ticket ${qNo} for ${cName}`);
+  }
+
+  // while (stateWebSocket && ticketsData.length <= len) {
+  //   await new Promise(resolve => setTimeout(resolve, 100));
+  // }
+
+  // activeTicketId = ticketsData[0].id;
+  //
+  // loadActiveTicket();
+  // switchTab('measurementTab');
 }

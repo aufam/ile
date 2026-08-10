@@ -34,34 +34,19 @@
       <!-- Appraiser Login Form -->
       <form id="appraiserLoginForm" onsubmit="handleAppraiserLogin(event)" class="login-form">
         <!-- Branch Field -->
-        <div class="login-field-group">
-          <label for="loginBranch" class="login-label">
-            <i class="fa-solid fa-building-user"></i> Branch Location <span class="required-star">*</span>
-          </label>
-          <div class="input-with-icon">
-            <select id="loginBranch" class="login-input" required>
-              <option value="Jakarta Barat">Jakarta Barat (Headquarters)</option>
-              <option value="Tanjung Barat">Tanjung Barat Branch</option>
-              <option value="Artha Gading">Artha Gading Mall Branch</option>
-              <option value="Surabaya Central">Surabaya Central Branch</option>
-              <option value="Bandung Hub">Bandung Hub Station</option>
-            </select>
-          </div>
+        <div class="login-field-group"> <label for="loginBranch" class="login-label"> <i
+              class="fa-solid fa-building-user"></i> Office Location <span class="required-star">*</span> </label>
+          <div class="input-with-icon"> <select id="loginBranch" class="login-input" required>
+              <option value="" disabled selected>Loading offices...</option>
+            </select> </div>
         </div>
 
         <!-- Counter Field -->
-        <div class="login-field-group">
-          <label for="loginCounter" class="login-label">
-            <i class="fa-solid fa-desktop"></i> Station Counter <span class="required-star">*</span>
-          </label>
-          <div class="input-with-icon">
-            <select id="loginCounter" class="login-input" required>
-              <option value="Counter #01">Counter #01 (Main Evaluation)</option>
-              <option value="Counter #02">Counter #02 (Express Valuation)</option>
-              <option value="Counter #03">Counter #03 (VIP Suite)</option>
-              <option value="Counter #04">Counter #04 (High-Value Vault)</option>
-            </select>
-          </div>
+        <div class="login-field-group"> <label for="loginCounter" class="login-label"> <i
+              class="fa-solid fa-desktop"></i> Station Counter <span class="required-star">*</span> </label>
+          <div class="input-with-icon"> <select id="loginCounter" class="login-input" required>
+              <option value="" disabled selected>Select an office first</option>
+            </select> </div>
         </div>
 
         <!-- Appraiser Name Field -->
@@ -70,8 +55,8 @@
             <i class="fa-solid fa-user-tie"></i> Appraiser Name <span class="required-star">*</span>
           </label>
           <div class="input-with-icon">
-            <input type="text" id="loginAppraiserName" class="login-input" required 
-                   placeholder="e.g. Jane Doe (Appraiser)" value="Jane Doe (Appraiser)">
+            <input type="text" id="loginAppraiserName" class="login-input" required placeholder="e.g. Fatmawati"
+              value="">
           </div>
         </div>
 
@@ -144,7 +129,8 @@
           </div>
 
           <div class="station-action-cell">
-            <button type="button" onclick="showLoginPage()" class="station-switch-btn" title="Switch Appraiser or Station">
+            <button type="button" onclick="showLoginPage()" class="station-switch-btn"
+              title="Switch Appraiser or Station">
               <i class="fa-solid fa-arrow-right-from-bracket"></i> Switch Appraiser
             </button>
           </div>
@@ -155,7 +141,7 @@
       <!-- Navigation Tabs -->
       <nav id="navTabs" class="ile-nav-tabs">
         <button onclick="switchTab('queueTab')" id="tabBtn-queueTab" class="ile-nav-tab active">
-          <i class="fa-solid fa-users"></i> Queue & Active Tickets <span id="queueBadge" class="ile-tab-count">3</span>
+          <i class="fa-solid fa-users"></i> Queue & Active Tickets <span id="queueBadge" class="ile-tab-count">0</span>
         </button>
         <button onclick="switchTab('measurementTab')" id="tabBtn-measurementTab" class="ile-nav-tab">
           <i class="fa-solid fa-scale-balanced"></i> Item Measurement & XRF
@@ -361,15 +347,11 @@
                   Purity / Carat (K) <span class="required">*</span>
                 </label>
                 <div class="preset-row">
-                  <input type="number" step="0.1" min="0" max="24" id="itemCarat" required
-                    oninput="calculateItemTotal()" placeholder="e.g. 18.0" class="field-input mono">
+                  <input type="text" id="itemCarat" required oninput="calculateItemTotal()"
+                    placeholder="e.g. LM Certi (2026)" class="field-input mono">
+
                   <select onchange="applyCaratPreset(this.value)" class="preset-select">
                     <option value="">Preset</option>
-                    <option value="24">24K (99.9%)</option>
-                    <option value="22">22K (91.6%)</option>
-                    <option value="18">18K (75.0%)</option>
-                    <option value="14">14K (58.5%)</option>
-                    <option value="10">10K (41.7%)</option>
                   </select>
                 </div>
               </div>

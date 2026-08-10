@@ -1,5 +1,5 @@
 // ==================== MEASUREMENT TAB: FORM, ITEMS LIST, CALCULATIONS ====================
-function loadActiveTicket(ticketId) {
+function loadActiveTicket() {
   const ticket = getActiveTicket();
   if (!ticket) return;
 
@@ -128,13 +128,21 @@ function calculateItemTotal() {
 
 function applyCaratPreset(caratVal) {
   if (!caratVal) return;
-  document.getElementById('itemCarat').value = caratVal;
 
-  // Auto suggest price multiplier based on standard spot gold (Rp2.000.000/g 24K base)
-  const base24K = 80.00;
-  const purityRatio = parseFloat(caratVal) / 24.0;
-  const suggestedRate = (base24K * purityRatio).toFixed(2);
-  document.getElementById('itemPricePerGram').value = suggestedRate;
+  const caratInput = document.getElementById('itemCarat');
+  const priceInput = document.getElementById('itemPricePerGram');
+  const pricelist = window.offices[currentAppraiser.branch].pricelist;
+
+  const item = pricelist.find(
+    item => item.type === type
+  );
+
+  if (!item) {
+    return;
+  }
+
+  caratInput.value = item.type;
+  priceInput.value = formatRupiah(item.price);
 
   calculateItemTotal();
 }
@@ -188,43 +196,48 @@ function resetMeasurementForm() {
 }
 
 // Save / Edit Item
-function handleSaveItem(e) {
+async function handleSaveItem(e) {
   e.preventDefault();
   const ticket = getActiveTicket();
   if (!ticket) return;
 
-  const itemId = document.getElementById('editingItemId').value;
+  const itemId = parseInt(document.getElementById('editingItemId').value || 0);
   const title = document.getElementById('itemTitle').value;
   const weight = parseFloat(document.getElementById('itemWeight').value) || 0;
-  const carat = parseFloat(document.getElementById('itemCarat').value) || 0;
+  const priceType = document.getElementById('itemCarat').value;
   const pricePerGram = parseRupiah(document.getElementById('itemPricePerGram').value) || 0;
   const totalPrice = parseRupiah(document.getElementById('itemTotalPrice').value) || 0;
 
   const newItemData = {
-    id: itemId || `item-${Date.now()}`,
+    id: itemId,
     title: title,
-    photo: currentPhoto1 || SAMPLE_IMAGES.jewelry,
-    weighing_photo: currentPhoto2 || SAMPLE_IMAGES.scale,
-    xrf_photo: currentPhoto3 || SAMPLE_IMAGES.xrf,
+    photo: currentPhoto1,
+    weighing_photo: currentPhoto2,
+    xrf_photo: currentPhoto3,
     weight: weight,
-    carat: carat,
+    carat: "", // TODO: later
+    price_type: priceType,
     price_per_gram: pricePerGram,
     total_price: totalPrice
   };
 
-  if (itemId) {
-    // Update existing
-    const idx = ticket.items.findIndex(i => i.id === itemId);
-    if (idx !== -1) ticket.items[idx] = newItemData;
-    showToast("Jewelry item updated.");
+  const response = await fetch(
+    `/api/items?ticketId=${ticket.id}` +
+    `&office=${encodeURIComponent(currentAppraiser.branch)}` +
+    `&counter=${encodeURIComponent(currentAppraiser.counter)}` +
+    `&date=${encodeURIComponent(currentAppraiser.date)}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newItemData)
+    }
+  );
+  if (!response.ok) {
+    showToast(`Failed: ${response.status}`);
   } else {
-    // Add new
-    ticket.items.push(newItemData);
-    showToast("New jewelry item attached to queue ticket!");
+    showToast("Item patched.");
   }
 
-  renderActiveTicketItems();
-  renderQueueGrid();
   resetMeasurementForm();
 }
 
@@ -250,12 +263,21 @@ function editItem(itemId) {
   setPhotoPreview('photo3', item.xrf_photo);
 }
 
-function deleteItem(itemId) {
+async function deleteItem(itemId) {
   const ticket = getActiveTicket();
   if (!ticket) return;
 
-  ticket.items = ticket.items.filter(i => i.id !== itemId);
-  renderActiveTicketItems();
-  renderQueueGrid();
-  showToast("Item removed.");
+  const response = await fetch(
+    `/api/items?id=${itemId}` +
+    `&office=${encodeURIComponent(currentAppraiser.branch)}` +
+    `&counter=${encodeURIComponent(currentAppraiser.counter)}` +
+    `&date=${encodeURIComponent(currentAppraiser.date)}`
+    ,
+    { method: 'DELETE' }
+  );
+  if (!response.ok) {
+    showToast(`Delete failed: ${response.status}`);
+  } else {
+    showToast("Item removed.");
+  }
 }
