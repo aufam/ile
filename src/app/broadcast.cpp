@@ -125,7 +125,7 @@ asio::awaitable<void> ile::App::broadcast(const Room &room) {
                 if (!ec)
                     return;
 
-                fmt::println(stderr, "{}: room={}: {}", remote_name, room, ec.to_string());
+                fmt::println(stderr, "[{}]: room={}: {}", remote_name, room, ec.to_string());
 
                 std::unique_lock<std::mutex> lock(this->mtx);
                 if (auto it = rooms.find(room); it != rooms.end()) {

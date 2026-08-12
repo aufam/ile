@@ -32,37 +32,8 @@ ile::App::App(const ile::Cli::Serve &args)
         exit(1);
     }
 
-    namespace sql = cpx::sql;
-    using ile::database::items;
-    using ile::database::tickets;
-
-    {
-        db(sql::create_table_if_not_exists<items>(
-            items.id,
-            items.ticket_id,
-            items.title,
-            items.photo,
-            items.weighing_photo,
-            items.xrf_photo,
-            items.weight,
-            items.carat,
-            items.price_type,
-            items.price_per_gram,
-            items.total_price
-        ));
-
-        db(sql::create_table_if_not_exists<tickets>(
-            tickets.id,
-            tickets.office,
-            tickets.counter,
-            tickets.staff_name,
-            tickets.customer_name,
-            tickets.customer_queue_number,
-            tickets.date,
-            tickets.status,
-            tickets.signature
-        ));
-    }
+    db(ile::database::create_table_items());
+    db(ile::database::create_table_tickets());
 
     if (std::filesystem::exists(args.offices))
         cpx::toruniina_toml::parse_from_file(args.offices, this->offices);

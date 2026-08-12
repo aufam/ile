@@ -59,10 +59,10 @@ function renderQueueGrid() {
                     </div>
 
                     <div class="ticket-card-actions">
-                        <button onclick="selectAndWorkOnTicket('${ticket.id}')" class="ticket-work-btn ${isActive ? 'is-active' : ''}">
+                        <button onclick="selectAndWorkOnTicket(${ticket.id})" class="ticket-work-btn ${isActive ? 'is-active' : ''}">
                             <i class="fa-solid fa-scale-balanced"></i> ${isActive ? 'Currently Active' : 'Work on Ticket'}
                         </button>
-                        <button onclick="deleteTicket('${ticket.id}')" class="ticket-delete-btn" title="Delete Ticket">
+                        <button onclick="deleteTicket(${ticket.id})" class="ticket-delete-btn" title="Delete Ticket">
                             <i class="fa-solid fa-trash-can"></i>
                         </button>
                     </div>

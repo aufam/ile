@@ -1,6 +1,5 @@
 module;
 
-#include <tuple>
 #include <mutex>
 #include <string>
 #include "../boost.h"
@@ -68,43 +67,9 @@ void ile::App::api_items() {
 
         auto row = db(sql::select(items.id).from(items).where(items.id == item.id));
         if (row.is_done()) {
-            db( //
-                sql::insert_into<items>(
-                    items.ticket_id,
-                    items.title,
-                    items.photo,
-                    items.weighing_photo,
-                    items.xrf_photo,
-                    items.weight,
-                    items.carat,
-                    items.price_type,
-                    items.total_price
-                )
-                    .values({
-                        ticket_id,
-                        item.title,
-                        item.photo,
-                        item.weighing_photo,
-                        item.xrf_photo,
-                        item.weight,
-                        item.carat,
-                        item.price_type,
-                        item.total_price,
-                    })
-            );
+            db(ile::database::insert_into_items(ticket_id, item));
         } else {
-            db( //
-                sql::update<items>.set(
-                    items.title = item.title,
-                    items.photo = item.photo,
-                    items.weighing_photo = item.weighing_photo,
-                    items.xrf_photo = item.xrf_photo,
-                    items.weight = item.weight,
-                    items.carat = item.carat,
-                    items.price_type = item.price_type,
-                    items.total_price = item.total_price
-                ).where(items.id == item.id)
-            );
+            db(ile::database::update_item(item));
         }
 
         res.result(http::status::ok);

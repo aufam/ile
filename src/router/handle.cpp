@@ -37,6 +37,7 @@ asio::awaitable<void> ile::Router::handle(beast::tcp_stream stream) const {
                     std::unique_lock<std::mutex> lock(this->mtx);
                     this->tcp_streams.erase(remote_name);
                 }
+                fmt::println(stderr, "[{}] ws update.", remote_name);
                 co_await handle_ws(remote_name, std::move(stream), req);
                 co_return;
             } else {

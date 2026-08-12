@@ -103,11 +103,13 @@ function connectStateWebSocket() {
       closeNewCustomerModal();
       loadActiveTicket();
       switchTab('measurementTab');
-      // showToast(`Created Queue Ticket ${qNo} for ${cName}`);
     }
 
     renderActiveTicketItems();
     renderQueueGrid();
+    if (typeof showToast === 'function') {
+      showToast(`Updated queue tickets`);
+    }
   };
 
   stateWebSocket.onclose = () => {

@@ -56,11 +56,11 @@ function renderCustomerPresentation() {
                         </div>
                         <div>
                             <span class="metric-label">Assayed Carat</span>
-                            <span class="metric-value amber">${item.carat}K</span>
+                            <span class="metric-value amber">${item.price_type}K</span>
                         </div>
                         <div>
                             <span class="metric-label">Assigned Rate</span>
-                            <span class="metric-value">${formatRupiah(item)} / g</span>
+                            <span class="metric-value">${formatRupiah(item.price_per_gram)} / g</span>
                         </div>
                     </div>
                 `;

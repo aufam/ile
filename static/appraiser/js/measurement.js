@@ -16,7 +16,7 @@ function loadActiveTicket() {
       el.value = val || '';
     }
   };
-  setStationDisplay('stationBranch', ticket.branch);
+  setStationDisplay('stationBranch', ticket.office);
   setStationDisplay('stationCounter', ticket.counter);
   setStationDisplay('stationStaff', ticket.staff_name);
 
@@ -54,6 +54,7 @@ function renderActiveTicketItems() {
     const itemCard = document.createElement('div');
     itemCard.className = "item-row-card";
 
+    console.log(`showing title=${item.title} price_per_gram=${item.price_per_gram}`);
     itemCard.innerHTML = `
                     <div class="item-row-top">
                         <div class="item-row-id-group">
@@ -66,10 +67,10 @@ function renderActiveTicketItems() {
                             </div>
                         </div>
                         <div class="item-row-actions">
-                            <button onclick="editItem('${item.id}')" class="icon-btn edit" title="Edit Item">
+                            <button onclick="editItem(${item.id})" class="icon-btn edit" title="Edit Item">
                                 <i class="fa-solid fa-pen"></i>
                             </button>
-                            <button onclick="deleteItem('${item.id}')" class="icon-btn remove" title="Remove Item">
+                            <button onclick="deleteItem(${item.id})" class="icon-btn remove" title="Remove Item">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
@@ -77,9 +78,9 @@ function renderActiveTicketItems() {
 
                     <!-- 3 Photo Thumbnails -->
                     <div class="item-row-thumbs">
-                        <img src="${item.photo || SAMPLE_IMAGES.jewelry}" title="Item Photo">
-                        <img src="${item.weighing_photo || SAMPLE_IMAGES.scale}" title="Scale Photo">
-                        <img src="${item.xrf_photo || SAMPLE_IMAGES.xrf}" title="XRF Spectrum Photo">
+                        <img src="${item.photo}" title="Item Photo">
+                        <img src="${item.weighing_photo}" title="Scale Photo">
+                        <img src="${item.xrf_photo}" title="XRF Spectrum Photo">
                     </div>
 
                     <div class="item-row-metrics">
@@ -89,7 +90,7 @@ function renderActiveTicketItems() {
                         </div>
                         <div>
                             <span class="metric-label">Rate</span>
-                            <span class="metric-value">${formatRupiah(item)}/g</span>
+                            <span class="metric-value">${formatRupiah(item.price_per_gram)}/g</span>
                         </div>
                         <div>
                             <span class="metric-label">Total</span>
@@ -101,7 +102,7 @@ function renderActiveTicketItems() {
   });
 
   document.getElementById('summaryTotalWeight').textContent = `${totalWeight.toFixed(2)} g`;
-  document.getElementById('summaryGrandTotal').textContent = `${formatRupiah(grandTotal)}`;
+  document.getElementById('summaryGrandTotal').textContent = `Rp${formatRupiah(grandTotal)}`;
   document.getElementById('itemsCountBadge').textContent = `${ticket.items.length} items`;
 }
 
@@ -133,16 +134,16 @@ function applyCaratPreset(caratVal) {
   const priceInput = document.getElementById('itemPricePerGram');
   const pricelist = window.offices[currentAppraiser.branch].pricelist;
 
-  const item = pricelist.find(
-    item => item.type === type
+  const price = pricelist.find(
+    price => price.type === caratVal
   );
 
-  if (!item) {
+  if (!price) {
     return;
   }
 
-  caratInput.value = item.type;
-  priceInput.value = formatRupiah(item.price);
+  caratInput.value = price.type;
+  priceInput.value = formatRupiah(price.price);
 
   calculateItemTotal();
 }
@@ -235,10 +236,9 @@ async function handleSaveItem(e) {
   if (!response.ok) {
     showToast(`Failed: ${response.status}`);
   } else {
-    showToast("Item patched.");
+    showToast("Item submitted.");
+    resetMeasurementForm();
   }
-
-  resetMeasurementForm();
 }
 
 function editItem(itemId) {
@@ -251,7 +251,7 @@ function editItem(itemId) {
   document.getElementById('editingItemId').value = item.id;
   document.getElementById('itemTitle').value = item.title;
   document.getElementById('itemWeight').value = item.weight;
-  document.getElementById('itemCarat').value = item.carat;
+  document.getElementById('itemCarat').value = item.price_type;
   document.getElementById('itemPricePerGram').value = item.price_per_gram;
   document.getElementById('itemTotalPrice').value = item.total_price;
 

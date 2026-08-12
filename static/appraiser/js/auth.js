@@ -37,7 +37,8 @@ async function initializeLoginForm() {
     for (const [id, office] of Object.entries(window.offices)) {
       const option = document.createElement("option");
       option.value = id;
-      option.textContent = office.name; branchSelect.appendChild(option);
+      option.textContent = office.name;
+      branchSelect.appendChild(option);
     }
     updateCounters();
   } catch (error) {
@@ -91,9 +92,8 @@ function handleAppraiserLogin(event) {
     // `value` is the pricelist type.
     option.value = item.type;
 
-    // Display the type and price.
-    option.textContent =
-      `${item.type} - Rp ${item.price.toLocaleString('id-ID')}`;
+    // Display the price type.
+    option.textContent = item.type;
 
     select.appendChild(option);
   }

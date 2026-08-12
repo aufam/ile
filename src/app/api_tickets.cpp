@@ -30,27 +30,26 @@ void ile::App::api_tickets() {
 
         auto params = url->params();
 
-        std::string office, counter, date;
+        ile::Ticket ticket;
         for (auto param : params) {
             if (param.key == "office")
-                office = std::string(param.value);
+                ticket.office = std::string(param.value);
             if (param.key == "counter")
-                counter = std::string(param.value);
+                ticket.counter = std::string(param.value);
             if (param.key == "date")
-                date = std::string(param.value);
+                ticket.date = std::string(param.value);
         }
-        if (office.empty() || counter.empty() || date.empty()) {
+        if (ticket.office.empty() || ticket.counter.empty() || ticket.date.empty()) {
             fmt::println(stderr, "missing field");
             res.result(http::status::bad_request);
             co_return;
         }
 
-        std::string staff_name, customer_name, customer_queue_number, status;
-        std::tuple  fields = {
-            cpx::field_ref(staff_name)            = "staff_name",
-            cpx::field_ref(customer_name)         = "customer_name",
-            cpx::field_ref(customer_queue_number) = "customer_queue_number",
-            cpx::field_ref(status)                = "status",
+        std::tuple fields = {
+            cpx::field_ref(ticket.staff_name)            = "staff_name",
+            cpx::field_ref(ticket.customer_name)         = "customer_name",
+            cpx::field_ref(ticket.customer_queue_number) = "customer_queue_number",
+            cpx::field_ref(ticket.status)                = "status",
         };
 
         try {
@@ -68,32 +67,23 @@ void ile::App::api_tickets() {
                 sql::select(tickets.customer_queue_number)
                     .from(tickets)
                     .where(
-                        tickets.office == office && tickets.counter == counter && tickets.date == date &&
-                        tickets.customer_queue_number == customer_queue_number
+                        tickets.office == ticket.office &&   //
+                        tickets.counter == ticket.counter && //
+                        tickets.date == ticket.date &&       //
+                        tickets.customer_queue_number == ticket.customer_queue_number
                     )
             );
         if (!ticket_row.is_done()) {
-            res.result(http::status::precondition_failed);
+            res.result(http::status::conflict);
+            res.reason("Already exists");
             co_return;
         }
 
-        db( //
-            sql::insert_into<tickets>(
-                tickets.office,
-                tickets.counter,
-                tickets.staff_name,
-                tickets.customer_name,
-                tickets.customer_queue_number,
-                tickets.date,
-                tickets.status
-            )
-                .values({office, counter, staff_name, customer_name, customer_queue_number, date, status})
-        );
-
+        db(ile::database::insert_tickets(ticket));
         res.result(http::status::ok);
 
         lock.unlock();
-        asio::co_spawn(io, broadcast({office, counter, date}), asio::detached);
+        asio::co_spawn(io, broadcast({ticket.office, ticket.counter, ticket.date}), asio::detached);
     };
 
     router.http_handlers["DELETE /api/tickets"] = [this](const http_request &req, http_response &res) -> asio::awaitable<void> {
