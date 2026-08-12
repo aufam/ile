@@ -6,6 +6,8 @@ const SAMPLE_IMAGES = {
   xrf: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'><rect width='100%' height='100%' fill='%2318181b'/><path d='M 50 200 Q 120 40 180 180 T 350 200' stroke='%2310b981' stroke-width='4' fill='none'/><text x='200' y='80' text-anchor='middle' fill='%2334d399' font-size='20' font-family='sans-serif'>Au: 75.2% (18.05K)</text><text x='50%' y='88%' text-anchor='middle' fill='%2394a3b8' font-size='14' font-family='sans-serif'>XRF Spectrometry Peak</text></svg>"
 };
 
+const APPRAISER_SESSION_KEY = 'ile_appraiser_session';
+
 // Rupiah formatter
 const rupiahFormatter = new Intl.NumberFormat("id-ID", {
   maximumFractionDigits: 0,

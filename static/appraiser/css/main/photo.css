@@ -1,0 +1,121 @@
+/* --- Photo verification matrix --- */
+.photo-matrix {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 480px) {
+  .photo-matrix {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 640px) {
+  .photo-matrix {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.photo-slot {
+  background-color: var(--slate-950);
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--slate-800);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.photo-slot-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--slate-400);
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.photo-slot-label i {
+  color: var(--amber-400);
+}
+
+.photo-preview-box {
+  width: 100%;
+  height: 8rem;
+  border-radius: 0.5rem;
+  background-color: var(--slate-900);
+  border: 1px dashed var(--slate-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.photo-preview-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-placeholder {
+  text-align: center;
+  padding: 0.5rem;
+}
+
+.photo-placeholder i {
+  color: var(--slate-600);
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.photo-placeholder p {
+  font-size: 0.625rem;
+  color: var(--slate-500);
+}
+
+.photo-slot-actions {
+  margin-top: 0.625rem;
+  width: 100%;
+  display: flex;
+  gap: 0.25rem;
+}
+
+.photo-upload-label {
+  flex: 1;
+  text-align: center;
+  background-color: var(--slate-800);
+  color: var(--slate-300);
+  font-size: 0.6875rem;
+  padding: 0.5rem 0.5rem;
+  /* Taller element */
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.photo-upload-label:hover {
+  background-color: var(--slate-700);
+}
+
+.photo-sample-btn {
+  background-color: var(--slate-800);
+  color: var(--slate-400);
+  border: none;
+  font-size: 0.6875rem;
+  padding: 0.5rem 0.5rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.photo-sample-btn:hover {
+  background-color: rgba(90, 168, 216, 0.2);
+  color: var(--amber-300);
+}

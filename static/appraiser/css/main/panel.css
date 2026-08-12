@@ -1,0 +1,92 @@
+/* --- Generic surface panel --- */
+.ile-panel {
+  background-color: var(--slate-900);
+  border: 1px solid var(--slate-800);
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 20px 25px -5px rgba(30, 58, 92, 0.2);
+}
+
+@media (min-width: 640px) {
+  .ile-panel {
+    padding: 1.25rem;
+  }
+
+  .ile-panel.padded-lg {
+    padding: 1.5rem;
+  }
+}
+
+.ile-panel-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--slate-800);
+  padding-bottom: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .ile-panel-header {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+}
+
+.ile-panel-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--slate-100);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ile-panel-title i {
+  color: var(--amber-400);
+}
+
+.ile-panel-subtitle {
+  font-size: 0.8125rem;
+  color: var(--slate-400);
+  margin-top: 0.25rem;
+}
+
+.panel-title-lg {
+  font-size: 1.25rem;
+}
+
+.panel-title-md {
+  font-size: 1.125rem;
+}
+
+.panel-title-sm {
+  font-size: 1rem;
+}
+
+.panel-flex-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 768px) {
+  .panel-flex-col {
+    margin-bottom: 1.5rem;
+  }
+}
+
+.panel-flex-col-lg {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.side-col-flex {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}

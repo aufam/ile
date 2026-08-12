@@ -68,16 +68,7 @@ ile::App::App(const ile::Cli::Serve &args)
     router.ws_handlers["/audio"] = [this](const http_request &, std::shared_ptr<ws_stream> stream) -> asio::awaitable<void> {
         while (is_running) {
             beast::flat_buffer buffer;
-
-            try {
-                co_await stream->async_read(buffer);
-            } catch (boost::system::system_error &e) {
-                if (e.code() == ws::error::closed) {
-                    fmt::println(stderr, "ws closed");
-                    break;
-                }
-                throw;
-            }
+            co_await stream->async_read(buffer);
 
             std::string_view sv(static_cast<const char *>(buffer.data().data()), buffer.size());
             if (sv == "done") {

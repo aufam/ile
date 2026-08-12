@@ -1,0 +1,98 @@
+/* --- Station context grid --- */
+.station-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  background-color: rgba(241, 245, 250, 0.8);
+  padding: 0.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--slate-800);
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .station-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.station-field-label {
+  display: block;
+  color: var(--slate-400);
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.125rem;
+}
+
+.station-field-label i {
+  color: var(--amber-400);
+  margin-right: 0.25rem;
+}
+
+.station-input {
+  width: 100%;
+  background-color: var(--slate-900);
+  border: 1px solid var(--slate-700);
+  border-radius: 0.25rem;
+  padding: 0.375rem;
+  color: var(--slate-200);
+  font-size: 0.75rem;
+}
+
+.station-input:focus {
+  border-color: var(--amber-500);
+  outline: none;
+}
+
+.station-display-value {
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--slate-800);
+  border-radius: 0.375rem;
+  padding: 0.375rem 0.625rem;
+  color: var(--amber-300);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: none;
+  cursor: default;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.station-action-cell {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+}
+
+.station-switch-btn {
+  width: 100%;
+  background: rgba(90, 168, 216, 0.12);
+  border: 1px solid rgba(90, 168, 216, 0.3);
+  color: #4a90c4;
+  padding: 0.375rem 0.65rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  height: 36px;
+  /* Incremented height index metrics */
+}
+
+.station-switch-btn:hover {
+  background: rgba(90, 168, 216, 0.25);
+  border-color: rgba(90, 168, 216, 0.5);
+  color: #14293a;
+}

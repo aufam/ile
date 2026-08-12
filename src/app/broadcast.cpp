@@ -120,20 +120,10 @@ asio::awaitable<void> ile::App::broadcast(const Room &room) {
         auto payload = std::make_shared<std::string>(cpx::yy_json::dump(fields));
 
         // TODO: need to serialize stream write?
-        stream->async_write(
-            asio::buffer(*payload), [this, payload, stream, room, remote_name](const beast::error_code &ec, size_t) {
-                if (!ec)
-                    return;
-
-                fmt::println(stderr, "[{}]: room={}: {}", remote_name, room, ec.to_string());
-
-                std::unique_lock<std::mutex> lock(this->mtx);
-                if (auto it = rooms.find(room); it != rooms.end()) {
-                    std::erase_if(it->second, [&](const std::pair<std::shared_ptr<ws_stream>, std::string> &s) {
-                        return stream.get() == s.first.get();
-                    });
-                }
-            }
+        asio::co_spawn(
+            io,
+            [stream, payload]() -> asio::awaitable<void> { co_await stream->async_write(asio::buffer(*payload)); },
+            asio::detached
         );
     }
 }

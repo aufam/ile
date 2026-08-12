@@ -1,0 +1,154 @@
+/* --- Two column measurement layout --- */
+.measurement-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .measurement-grid {
+    grid-template-columns: 7fr 5fr;
+  }
+}
+
+/* --- Numeric metrics grid --- */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  background-color: rgba(241, 245, 250, 0.6);
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--slate-800);
+}
+
+@media (min-width: 480px) {
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.field-with-suffix {
+  position: relative;
+}
+
+.field-suffix {
+  position: absolute;
+  right: 0.75rem;
+  top: 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--slate-500);
+}
+
+.field-with-prefix {
+  position: relative;
+}
+
+.field-prefix {
+  position: absolute;
+  left: 0.75rem;
+  top: 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--slate-500);
+}
+
+.field-with-prefix .field-input {
+  padding-left: 2rem;
+}
+
+.field-with-suffix .field-input {
+  padding-right: 2.25rem;
+}
+
+.preset-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.preset-select {
+  background-color: var(--slate-800);
+  font-size: 0.75rem;
+  border: 1px solid var(--slate-700);
+  border-radius: 0.75rem;
+  padding: 0 0.5rem;
+  color: var(--slate-300);
+}
+
+.preset-select:focus {
+  outline: none;
+}
+
+.field-label.amber {
+  color: var(--amber-400);
+}
+
+.field-prefix.amber {
+  color: var(--amber-500);
+  font-weight: 700;
+}
+
+.field-input.result-highlight {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-color: rgba(90, 168, 216, 0.4);
+  color: var(--amber-300);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.form-actions-row {
+  display: flex;
+  flex-direction: column-reverse;
+  /* Put main affirmative button on top or right naturally */
+  gap: 0.75rem;
+  align-items: stretch;
+  padding-top: 0.5rem;
+}
+
+@media (min-width: 480px) {
+  .form-actions-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.btn-form-secondary {
+  padding: 0.625rem 1rem;
+  /* Standardizing touch dimensions globally */
+  background-color: var(--slate-800);
+  color: var(--slate-300);
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  text-align: center;
+}
+
+.btn-form-secondary:hover {
+  background-color: var(--slate-700);
+}
+
+.btn-form-primary {
+  padding: 0.625rem 1.5rem;
+  background: linear-gradient(to right, var(--amber-500), var(--amber-600));
+  color: var(--slate-950);
+  font-weight: 700;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 15px -3px rgba(90, 168, 216, 0.2);
+  font-size: 0.875rem;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.15s ease;
+}
+
+.btn-form-primary:hover {
+  background: linear-gradient(to right, var(--amber-400), var(--amber-500));
+}

@@ -23,3 +23,4 @@ window.addEventListener('DOMContentLoaded', () => {
   initSignatureCanvas();
 });
 
+window.addEventListener("beforeunload", disconnectStateWebSocket)

@@ -1,0 +1,58 @@
+.field-input,
+.field-select {
+  width: 100%;
+  background-color: var(--slate-950);
+  border: 1px solid var(--slate-800);
+  border-radius: 0.75rem;
+  padding: 0.625rem 1rem;
+  font-size: 16px;
+  /* Optimized layout height avoiding input auto-zooming zoom overrides */
+  color: var(--slate-100);
+  font-family: var(--font-sans);
+}
+
+@media (min-width: 768px) {
+
+  .field-input,
+  .field-select {
+    font-size: 0.875rem;
+  }
+}
+
+.field-input:focus,
+.field-select:focus {
+  border-color: var(--amber-500);
+  outline: none;
+  box-shadow: 0 0 0 1px var(--amber-500);
+}
+
+.field-input.mono {
+  font-family: monospace;
+}
+
+.field-input.gold-strong {
+  color: var(--amber-400);
+  font-weight: 700;
+}
+
+.form-flex-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-flex-col-tight {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.btn-form-primary.btn-emerald {
+  background: var(--emerald-500);
+  box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2);
+  color: #ffffff;
+}
+
+.btn-form-primary.btn-emerald:hover {
+  background: #0d9c6f;
+}

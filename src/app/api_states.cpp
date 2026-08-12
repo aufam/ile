@@ -36,18 +36,39 @@ void ile::App::api_states() {
                 date = std::string(param.value);
         }
 
-        std::unique_lock<std::mutex> lock(this->mtx);
+        const Room room = {office, counter, date};
+        {
+            std::unique_lock<std::mutex> lock(this->mtx);
 
-        auto it = this->offices.find(office);
-        if (it == this->offices.end()) {
-            co_return;
+            auto it = this->offices.find(office);
+            if (it == this->offices.end()) {
+                co_await stream->async_close("office not found");
+                co_return;
+            }
+
+            this->rooms[room].push_back({stream, remote_name});
         }
-
-        Room room = {office, counter, date};
-        this->rooms[room].push_back({stream, remote_name});
-
-        lock.unlock();
         asio::co_spawn(io, broadcast(std::move(room)), asio::detached);
+
+        while (is_running) {
+            beast::flat_buffer buffer;
+
+            try {
+                co_await stream->async_read(buffer);
+            } catch (boost::system::system_error &e) {
+                std::unique_lock<std::mutex> lock(this->mtx);
+
+                if (auto it = rooms.find(room); it != rooms.end()) {
+                    std::erase_if(it->second, [&](const std::pair<std::shared_ptr<ws_stream>, std::string> &s) {
+                        return stream.get() == s.first.get();
+                    });
+                }
+
+                lock.unlock();
+
+                throw;
+            }
+        }
     };
 
     router.http_handlers["DELETE /ws/state"] = [this](const http_request &req, http_response &res) -> asio::awaitable<void> {

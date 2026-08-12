@@ -1,0 +1,57 @@
+/* --- Nav tabs --- */
+.ile-nav-tabs {
+  display: flex;
+  overflow-x: auto;
+  gap: 0.25rem;
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(203, 219, 235, 0.8);
+  font-size: 0.875rem;
+  font-weight: 500;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  /* Hide standard scrollbar on Firefox layout edge */
+}
+
+.ile-nav-tabs::-webkit-scrollbar {
+  display: none;
+  /* Hide custom scrollbar for clean tab row appearances */
+}
+
+.ile-nav-tab {
+  padding: 0.625rem 1rem;
+  /* Better tap standard */
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  background: none;
+  border: 1px solid transparent;
+  color: var(--slate-400);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.ile-nav-tab:hover {
+  color: var(--slate-200);
+  background-color: rgba(203, 219, 235, 0.5);
+}
+
+.ile-nav-tab.active {
+  background-color: rgba(90, 168, 216, 0.1);
+  color: var(--amber-400);
+  border-color: rgba(90, 168, 216, 0.3);
+}
+
+.ile-tab-count {
+  background-color: var(--amber-500);
+  color: var(--slate-950);
+  font-size: 0.75rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-weight: 700;
+}

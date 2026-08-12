@@ -18,6 +18,23 @@
 
   <!-- Centralized stylesheet (base component library + ILoveEmas theme) -->
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="css/login.css">
+  <link rel="stylesheet" href="css/header.css">
+  <link rel="stylesheet" href="css/header/station.css">
+  <link rel="stylesheet" href="css/header/nav.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/main/toast.css">
+  <link rel="stylesheet" href="css/main/label.css">
+  <link rel="stylesheet" href="css/main/input.css">
+  <link rel="stylesheet" href="css/main/panel.css">
+  <link rel="stylesheet" href="css/main/ticket.css">
+  <link rel="stylesheet" href="css/main/photo.css">
+  <link rel="stylesheet" href="css/main/button/pill.css">
+  <link rel="stylesheet" href="css/main/measurement.css">
+  <link rel="stylesheet" href="css/main/summary.css">
+  <link rel="stylesheet" href="css/main/presentation.css">
+  <link rel="stylesheet" href="css/modal/ticket.css">
+  <link rel="stylesheet" href="css/modal/signature.css">
 </head>
 
 <body class="ile-app">
@@ -178,7 +195,7 @@
               jewelry items to any queue number seamlessly.</p>
           </div>
           <div>
-            <button onclick="openNewCustomerModal()" class="btn-form-primary">
+            <button onclick="openNewTicketModal()" class="btn-form-primary">
               <i class="fa-solid fa-plus"></i> New Queue Ticket
             </button>
           </div>
@@ -212,10 +229,10 @@
         </div>
 
         <div class="active-ticket-actions">
-          <button onclick="switchTab('queueTab')" class="pill-btn pill-secondary">
+          <button onclick="switchTab('queueTab')" class="pill-btn pill-secondary pill-lg">
             <i class="fa-solid fa-arrow-left"></i> Switch Queue
           </button>
-          <button onclick="switchTab('customerReportTab')" class="pill-btn pill-amber">
+          <button onclick="switchTab('customerReportTab')" class="pill-btn pill-amber pill-lg">
             <i class="fa-solid fa-eye"></i> View Live Presentation
           </button>
         </div>
@@ -539,7 +556,7 @@
         <h3 class="ile-modal-title">
           <i class="fa-solid fa-user-plus"></i> Create New Customer Ticket
         </h3>
-        <button onclick="closeNewCustomerModal()" class="ile-modal-close">
+        <button onclick="closeNewTicketModal()" class="ile-modal-close">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
@@ -556,7 +573,7 @@
         </div>
 
         <div class="ile-modal-actions">
-          <button type="button" onclick="closeNewCustomerModal()" class="btn-form-secondary">Cancel</button>
+          <button type="button" onclick="closeNewTicketModal()" class="btn-form-secondary">Cancel</button>
           <button type="submit" class="btn-form-primary">
             Create & Open Ticket
           </button>
@@ -601,14 +618,13 @@
   <!-- ==================== APPLICATION SCRIPT (split into modules) ==================== -->
   <script src="js/config.js" defer></script>
   <script src="js/state.js" defer></script>
-  <script src="js/database.js" defer></script>
-  <script src="js/toast.js" defer></script>
+  <script src="js/components/websocket.js" defer></script>
+  <script src="js/components/toast.js" defer></script>
+  <script src="js/components/signature.js" defer></script>
   <script src="js/tabs.js" defer></script>
-  <script src="js/queue.js" defer></script>
-  <script src="js/measurement.js" defer></script>
-  <script src="js/presentation.js" defer></script>
-  <script src="js/modals.js" defer></script>
-  <script src="js/signature.js" defer></script>
+  <script src="js/tabs/measurement.js" defer></script>
+  <script src="js/tabs/presentation.js" defer></script>
+  <script src="js/tabs/ticket.js" defer></script>
   <script src="js/auth.js" defer></script>
   <script src="js/main.js" defer></script>
 </body>

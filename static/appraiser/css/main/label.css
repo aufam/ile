@@ -1,0 +1,32 @@
+.form-mode-label {
+  font-size: 0.75rem;
+  background-color: var(--slate-800);
+  color: var(--slate-300);
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.field-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--slate-300);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.field-label .required {
+  color: var(--amber-400);
+}
+
+.field-label-tight {
+  margin-bottom: 0.5rem;
+}
+
+.field-label-tight i {
+  color: var(--amber-400);
+  margin-right: 0.25rem;
+}

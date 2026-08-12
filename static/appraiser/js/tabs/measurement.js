@@ -63,7 +63,7 @@ function renderActiveTicketItems() {
                             </span>
                             <div>
                                 <h4 class="item-row-title">${item.title}</h4>
-                                <span class="item-row-purity">${item.carat}K Purity</span>
+                                <span class="item-row-purity">${item.price_type}</span>
                             </div>
                         </div>
                         <div class="item-row-actions">

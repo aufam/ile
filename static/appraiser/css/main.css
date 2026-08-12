@@ -1,0 +1,20 @@
+/* --- Main content / toasts --- */
+.ile-main {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1rem 0.75rem;
+  flex: 1;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .ile-main {
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .ile-main {
+    padding: 1.5rem 2rem;
+  }
+}

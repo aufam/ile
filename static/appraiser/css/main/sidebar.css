@@ -1,0 +1,77 @@
+.ile-sidebar {
+  /* Layout properties for the fixed sidebar */
+  width: 280px;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  overflow-y: auto;
+
+  /* Inherited colors from your original .ile-header */
+  background-color: var(--header-bg, #ffffff);
+  /* Fallbacks added just in case, but uses your exact styles */
+  color: var(--header-text, #333333);
+  border-right: 1px solid var(--header-border, #e2e8f0);
+}
+
+.ile-sidebar-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1.5rem 1rem;
+
+  /* Inherited styles from your original .ile-header-inner */
+  background: var(--header-inner-bg, transparent);
+}
+
+.ile-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-grow: 1;
+  margin: 1.5rem 0;
+
+  /* Inherited styles from your original .ile-nav-tabs container */
+  background: var(--nav-tabs-bg, transparent);
+}
+
+/* --- VERTICAL MODIFICATIONS FOR EXISTING COMPONENTS --- */
+
+/* Ensures the brand text stacks cleanly vertically instead of horizontally */
+.ile-sidebar .ile-brand-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+/* Converts horizontal button tabs into full-width vertical menu items */
+.ile-sidebar .ile-nav-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+/* Adjusts the badge component position inside a vertical tab item */
+.ile-sidebar .ile-tab-count {
+  margin-left: auto;
+}
+
+/* Stacks your station context grid components dynamically downwards */
+.ile-sidebar .station-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 1rem 0;
+}
+
+.ile-divider {
+  border: 0;
+  border-top: 1px solid var(--sidebar-divider);
+  margin: 1.25rem 0;
+}

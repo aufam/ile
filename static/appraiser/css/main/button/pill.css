@@ -1,0 +1,53 @@
+.pill-btn {
+  padding: 0.5rem 0.75rem;
+  /* Larger touch profile height */
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  transition: all 0.15s ease;
+  flex: 1;
+  /* Stretch on mobile banner stack layout */
+}
+
+@media (min-width: 640px) {
+  .pill-btn {
+    flex: none;
+    padding: 0.375rem 0.75rem;
+  }
+}
+
+.pill-btn.pill-secondary {
+  background-color: var(--slate-800);
+  color: var(--slate-300);
+}
+
+.pill-btn.pill-secondary:hover {
+  background-color: var(--slate-700);
+}
+
+.pill-btn.pill-amber {
+  background-color: var(--amber-500);
+  color: var(--slate-950);
+  font-weight: 600;
+}
+
+.pill-btn.pill-amber:hover {
+  background-color: var(--amber-400);
+}
+
+.pill-btn.pill-lg {
+  padding: 0.625rem 1rem;
+  /* Better scaling touch heights for buttons */
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.pill-btn.pill-lg.pill-amber {
+  font-weight: 700;
+}
