@@ -73,6 +73,27 @@ ile::App::App(const ile::Cli::Serve &args)
     api_items();
     api_states();
 
+    router.http_handlers["GET /api/rooms"] = [this](const http_request &, http_response &res) -> asio::awaitable<void> {
+        std::unique_lock<std::mutex> lock(this->mtx);
+
+        std::vector<Room>   rooms;
+        std::vector<size_t> lengths;
+        for (auto &[room, streams] : this->rooms) {
+            rooms.push_back(room);
+            lengths.push_back(streams.size());
+        }
+
+        std::tuple fields = {
+            cpx::field_ref(rooms)   = "rooms",
+            cpx::field_ref(lengths) = "lengths",
+        };
+
+        res.body() = cpx::yy_json::dump(fields);
+        res.set(http::field::content_type, "application/json");
+        res.result(http::status::ok);
+        co_return;
+    };
+
     router.ws_handlers["/audio"] = [this](const http_request &, std::shared_ptr<ws_stream> stream) -> asio::awaitable<void> {
         while (is_running) {
             beast::flat_buffer buffer;

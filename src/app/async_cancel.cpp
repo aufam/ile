@@ -16,7 +16,7 @@ asio::awaitable<void> ile::App::async_cancel() {
         acceptor.close();
         router.close_all_streams();
         for (auto &[_, streams] : rooms) {
-            for (auto stream : streams) {
+            for (auto &[stream, _] : streams) {
                 stream->close(ws::close_code::normal);
             }
         }

@@ -69,6 +69,12 @@ private:
         bool operator==(const Room &other) const {
             return office == other.office && counter == other.counter && date == other.date;
         }
+
+        static constexpr std::tuple __field_tags__ = {
+            cpx::field<&Room::office>  = "office",
+            cpx::field<&Room::counter> = "counter",
+            cpx::field<&Room::date>    = "date",
+        };
     };
     struct RoomHash {
         size_t operator()(const Room &room) const {
@@ -79,7 +85,7 @@ private:
             return h1 ^ (h2 << 1) ^ (h3 << 2);
         }
     };
-    std::unordered_map<Room, std::vector<std::shared_ptr<ws_stream>>, RoomHash> rooms;
+    std::unordered_map<Room, std::vector<std::pair<std::shared_ptr<ws_stream>, std::string>>, RoomHash> rooms;
 
     asio::awaitable<void> broadcast(const Room &room);
 

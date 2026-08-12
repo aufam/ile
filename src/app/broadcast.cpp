@@ -9,11 +9,10 @@ import cpx.sqlite;
 import cpx.fmt;
 import cpx.yy_json;
 
+
 asio::awaitable<void> ile::App::broadcast(const Room &room) {
-    auto it = rooms.find(room);
-    if (it == rooms.end()) {
-        co_return;
-    }
+    // fmt::println("BROADCAST: begin");
+    // cpx::defer _ = []() { fmt::println("BROADCAST: end"); };
 
     namespace sql = cpx::sql;
     using ile::database::items;
@@ -99,9 +98,42 @@ asio::awaitable<void> ile::App::broadcast(const Room &room) {
         }
     }
 
-    auto payload = cpx::yy_json::dump(res);
+    std::string _remote_name;
 
-    for (auto stream : it->second) {
-        co_await stream->async_write(asio::buffer(payload));
+    const std::tuple fields = {
+        cpx::field_ref(res)          = "ticketsData",
+        cpx::field_ref(_remote_name) = "remoteName",
+    };
+
+    std::vector<std::pair<std::shared_ptr<ws_stream>, std::string>> streams;
+    {
+        std::unique_lock<std::mutex> lock(this->mtx);
+        if (auto it = rooms.find(room); it == rooms.end()) {
+            co_return;
+        } else {
+            streams = it->second;
+        }
+    }
+
+    for (auto [stream, remote_name] : streams) {
+        _remote_name = remote_name;
+        auto payload = std::make_shared<std::string>(cpx::yy_json::dump(fields));
+
+        // TODO: need to serialize stream write?
+        stream->async_write(
+            asio::buffer(*payload), [this, payload, stream, room, remote_name](const beast::error_code &ec, size_t) {
+                if (!ec)
+                    return;
+
+                fmt::println(stderr, "{}: room={}: {}", remote_name, room, ec.to_string());
+
+                std::unique_lock<std::mutex> lock(this->mtx);
+                if (auto it = rooms.find(room); it != rooms.end()) {
+                    std::erase_if(it->second, [&](const std::pair<std::shared_ptr<ws_stream>, std::string> &s) {
+                        return stream.get() == s.first.get();
+                    });
+                }
+            }
+        );
     }
 }

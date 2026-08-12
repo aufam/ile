@@ -180,6 +180,9 @@ function showMainApp() {
 
 function handleAppraiserLogout() {
   localStorage.removeItem(APPRAISER_SESSION_KEY);
+
+  fetch(`/ws/state?remoteName=${remoteName}`, { method: 'DELETE' });
+
   disconnectStateWebSocket();
   showLoginPage();
   if (typeof showToast === 'function') {

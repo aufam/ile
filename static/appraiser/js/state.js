@@ -60,6 +60,8 @@ let ticketsData = [
   //   ]
   // }
 ];
+let remoteName;
+
 let stateWebSocket;
 let shouldReconnect = true;
 
@@ -91,7 +93,9 @@ function connectStateWebSocket() {
 
     const len = ticketsData.length;
 
-    ticketsData = JSON.parse(event.data);
+    const broadcastData = JSON.parse(event.data);
+    ticketsData = broadcastData.ticketsData;
+    remoteName = broadcastData.remoteName;
 
     if (ticketsData.length > len) {
       activeTicketId = ticketsData[0].id;

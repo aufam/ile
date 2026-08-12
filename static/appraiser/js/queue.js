@@ -12,7 +12,7 @@ function updateStationContext() {
     ticket.counter = getStationVal('stationCounter');
     ticket.staff_name = getStationVal('stationStaff');
     ticket.date = getStationVal('stationDate');
-    updateJsonInspector();
+    // updateJsonInspector();
   }
 }
 
