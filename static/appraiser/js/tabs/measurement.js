@@ -54,7 +54,6 @@ function renderActiveTicketItems() {
     const itemCard = document.createElement('div');
     itemCard.className = "item-row-card";
 
-    console.log(`showing title=${item.title} price_per_gram=${item.price_per_gram}`);
     itemCard.innerHTML = `
                     <div class="item-row-top">
                         <div class="item-row-id-group">
@@ -78,9 +77,9 @@ function renderActiveTicketItems() {
 
                     <!-- 3 Photo Thumbnails -->
                     <div class="item-row-thumbs">
-                        <img src="${item.photo}" title="Item Photo">
-                        <img src="${item.weighing_photo}" title="Scale Photo">
-                        <img src="${item.xrf_photo}" title="XRF Spectrum Photo">
+                        <img src="${item.photo || '/images/no-image.jpg'}" title="Item Photo">
+                        <img src="${item.weighing_photo || '/images/no-image.jpg'}" title="Scale Photo">
+                        <img src="${item.xrf_photo || '/images/no-image.jpg'}" title="XRF Spectrum Photo">
                     </div>
 
                     <div class="item-row-metrics">
@@ -90,7 +89,7 @@ function renderActiveTicketItems() {
                         </div>
                         <div>
                             <span class="metric-label">Rate</span>
-                            <span class="metric-value">${formatRupiah(item.price_per_gram)}/g</span>
+                            <span class="metric-value">Rp${formatRupiah(item.price_per_gram)}/g</span>
                         </div>
                         <div>
                             <span class="metric-label">Total</span>
@@ -108,41 +107,34 @@ function renderActiveTicketItems() {
 
 // Live Calculation
 function calculateItemTotal() {
-  const weight =
-    parseFloat(document.getElementById("itemWeight").value) || 0;
-
+  const weightInput = document.getElementById("itemWeight");
   const priceInput = document.getElementById("itemPricePerGram");
   const totalInput = document.getElementById("itemTotalPrice");
 
-  // Parse numeric value
+  const weight = parseFloat(weightInput.value.replace(',', '.')) || 0;
   const pricePerGram = parseRupiah(priceInput.value);
-
-  // Reformat as user types
-  priceInput.value = formatRupiah(pricePerGram);
-
-  // Calculate
   const total = Math.round(weight * pricePerGram);
 
-  // Display formatted result
+  priceInput.value = formatRupiah(pricePerGram);
   totalInput.value = formatRupiah(total);
 }
 
-function applyCaratPreset(caratVal) {
-  if (!caratVal) return;
+function applyPriceTypePreset(priceType) {
+  if (!priceType) return;
 
-  const caratInput = document.getElementById('itemCarat');
+  const priceTypeInput = document.getElementById('itemPriceType');
   const priceInput = document.getElementById('itemPricePerGram');
-  const pricelist = window.offices[currentAppraiser.branch].pricelist;
+  const pricelist = offices[currentAppraiser.branch].pricelist;
 
   const price = pricelist.find(
-    price => price.type === caratVal
+    price => price.type === priceType
   );
 
   if (!price) {
     return;
   }
 
-  caratInput.value = price.type;
+  priceTypeInput.value = price.type;
   priceInput.value = formatRupiah(price.price);
 
   calculateItemTotal();
@@ -155,15 +147,74 @@ function presetSampleImage(photoKey, sampleType) {
   showToast(`Loaded sample ${sampleType} device image.`);
 }
 
-function handleImageUpload(event, photoKey) {
+async function resizeImage(file, maxSize = 1920, quality = 0.85) {
+  const bitmap = await createImageBitmap(file);
+
+  let { width, height } = bitmap;
+
+  // Scale down while preserving aspect ratio
+  if (width > maxSize || height > maxSize) {
+    const scale = Math.min(maxSize / width, maxSize / height);
+    width = Math.round(width * scale);
+    height = Math.round(height * scale);
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(bitmap, 0, 0, width, height);
+
+  bitmap.close();
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      blob => blob ? resolve(blob) : reject(new Error("JPEG conversion failed")),
+      "image/jpeg",
+      quality
+    );
+  });
+}
+
+async function handleImageUpload(event, photoKey) {
   const file = event.target.files[0];
   if (!file) return;
 
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    setPhotoPreview(photoKey, e.target.result);
-  };
-  reader.readAsDataURL(file);
+  const toast = showToast('Uploading image...', 'loading');
+  try {
+    const jpeg = await resizeImage(file, 1920, 0.85);
+
+    const response = await fetch(
+      `/api/images?key=${photoKey}` +
+      `&office=${encodeURIComponent(currentAppraiser.branch)}` +
+      `&counter=${encodeURIComponent(currentAppraiser.counter)}` +
+      `&date=${encodeURIComponent(currentAppraiser.date)}`,
+      {
+        method: 'POST',
+        headers: { "Content-Type": jpeg.type },
+        body: jpeg
+      }
+    );
+
+    if (!response.ok)
+      throw new Error(`${response.status}`);
+
+    const result = await response.json();
+
+    // Replace local preview/reference with server URL
+    setPhotoPreview(photoKey, result.uri);
+
+    toast.querySelector('span').textContent = 'Upload complete';
+    toast.className = 'ile-toast success';
+    toast.querySelector('i').className = 'fa-solid fa-circle-check';
+  } catch (err) {
+    toast.className = 'ile-toast error';
+    toast.querySelector('i').className = 'fa-solid fa-circle-xmark';
+    toast.querySelector('span').textContent = `Upload failed: ${err}`;
+  } finally {
+    setTimeout(() => toast.remove(), 3000);
+  }
 }
 
 function setPhotoPreview(photoKey, dataUri) {
@@ -202,12 +253,20 @@ async function handleSaveItem(e) {
   const ticket = getActiveTicket();
   if (!ticket) return;
 
+  const weightInput = document.getElementById('itemWeight');
+  const purityInput = document.getElementById('itemPurity');
+  const titleInput = document.getElementById('itemTitle');
+  const priceTypeInput = document.getElementById('itemPriceType');
+  const pricePerGramInput = document.getElementById('itemPricePerGram');
+  const totalPriceInput = document.getElementById('itemTotalPrice');
+
   const itemId = parseInt(document.getElementById('editingItemId').value || 0);
-  const title = document.getElementById('itemTitle').value;
-  const weight = parseFloat(document.getElementById('itemWeight').value) || 0;
-  const priceType = document.getElementById('itemCarat').value;
-  const pricePerGram = parseRupiah(document.getElementById('itemPricePerGram').value) || 0;
-  const totalPrice = parseRupiah(document.getElementById('itemTotalPrice').value) || 0;
+  const title = titleInput.value;
+  const weight = parseFloat(weightInput.value.replace(',', '.')) || 0;
+  const purity = parseInt(purityInput.value || 0);
+  const priceType = priceTypeInput.value;
+  const pricePerGram = parseRupiah(pricePerGramInput.value) || 0;
+  const totalPrice = parseRupiah(totalPriceInput.value) || 0;
 
   const newItemData = {
     id: itemId,
@@ -216,7 +275,7 @@ async function handleSaveItem(e) {
     weighing_photo: currentPhoto2,
     xrf_photo: currentPhoto3,
     weight: weight,
-    carat: "", // TODO: later
+    purity: purity,
     price_type: priceType,
     price_per_gram: pricePerGram,
     total_price: totalPrice
@@ -251,7 +310,7 @@ function editItem(itemId) {
   document.getElementById('editingItemId').value = item.id;
   document.getElementById('itemTitle').value = item.title;
   document.getElementById('itemWeight').value = item.weight;
-  document.getElementById('itemCarat').value = item.price_type;
+  document.getElementById('itemPriceType').value = item.price_type;
   document.getElementById('itemPricePerGram').value = item.price_per_gram;
   document.getElementById('itemTotalPrice').value = item.total_price;
 

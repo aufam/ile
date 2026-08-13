@@ -1,9 +1,7 @@
 // ==================== APP INITIALIZATION ====================
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
   // Initialize appraiser authentication session
-  if (typeof initAuthSession === 'function') {
-    initAuthSession();
-  }
+  await initAuthSession();
 
   // Set default date display to today
   if (document.getElementById('stationDate')) {

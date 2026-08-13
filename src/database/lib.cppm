@@ -28,7 +28,7 @@ struct ile::Item {
     std::string weighing_photo;
     std::string xrf_photo;
     double      weight = 0;
-    std::string carat;
+    double      purity;
     std::string price_type;
     double      price_per_gram = 0;
     double      total_price    = 0;
@@ -42,7 +42,7 @@ struct ile::Item {
         cpx::field<&Item::weighing_photo>   = "weighing_photo,skipmissing",
         cpx::field<&Item::xrf_photo>        = "xrf_photo,skipmissing",
         cpx::field<&Item::weight>           = "weight",
-        cpx::field<&Item::carat>            = "carat",
+        cpx::field<&Item::purity>           = "purity",
         cpx::field<&Item::price_type>       = "price_type",
         cpx::field<&Item::price_per_gram>   = "price_per_gram",
         cpx::field<&Item::total_price>      = "total_price",
@@ -87,7 +87,7 @@ struct ile::database::Item {
     Column<Item, std::string> weighing_photo   = "weighing_photo text default ''";
     Column<Item, std::string> xrf_photo        = "xrf_photo text default ''";
     Column<Item, double>      weight           = "weight real default 0";
-    Column<Item, std::string> carat            = "carat real default ''";
+    Column<Item, double>      purity           = "purity real default 0";
     Column<Item, std::string> price_type       = "price_type text default ''";
     Column<Item, double>      price_per_gram   = "price_per_gram real default 0";
     Column<Item, double>      total_price      = "total_price real default 0";
@@ -121,7 +121,7 @@ namespace ile::database {
             items.weighing_photo,
             items.xrf_photo,
             items.weight,
-            items.carat,
+            items.purity,
             items.price_type,
             items.price_per_gram,
             items.total_price,
@@ -151,7 +151,7 @@ namespace ile::database {
                    items.weighing_photo,
                    items.xrf_photo,
                    items.weight,
-                   items.carat,
+                   items.purity,
                    items.price_type,
                    items.price_per_gram,
                    items.total_price,
@@ -164,7 +164,7 @@ namespace ile::database {
                 item.weighing_photo,
                 item.xrf_photo,
                 item.weight,
-                item.carat,
+                item.purity,
                 item.price_type,
                 item.price_per_gram,
                 item.total_price,
@@ -179,13 +179,13 @@ namespace ile::database {
                     items.weighing_photo = item.weighing_photo,
                     items.xrf_photo = item.xrf_photo,
                     items.weight = item.weight,
-                    items.carat = item.carat,
+                    items.purity = item.purity,
                     items.price_type = item.price_type,
                     items.total_price = item.total_price
                 ).where(items.id == item.id);
     }
 
-    export auto insert_tickets(const ile::Ticket &ticket) {
+    export auto insert_into_tickets(const ile::Ticket &ticket) {
         return cpx::sql::insert_into<tickets>(
                    tickets.office,
                    tickets.counter,
@@ -204,5 +204,12 @@ namespace ile::database {
                 ticket.date,
                 ticket.status,
             });
+    }
+
+    export auto update_ticket(const ile::Ticket &ticket) {
+        return cpx::sql::update<tickets>.set(
+                    tickets.signature = ticket.signature,
+                    tickets.status = ticket.status
+                ).where(tickets.id == ticket.id);
     }
 } // namespace ile::database

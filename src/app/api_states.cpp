@@ -46,7 +46,7 @@ void ile::App::api_states() {
                 co_return;
             }
 
-            this->rooms[room].push_back({stream, remote_name});
+            this->rooms[room].push_back(stream);
         }
         asio::co_spawn(io, broadcast(std::move(room)), asio::detached);
 
@@ -59,42 +59,13 @@ void ile::App::api_states() {
                 std::unique_lock<std::mutex> lock(this->mtx);
 
                 if (auto it = rooms.find(room); it != rooms.end()) {
-                    std::erase_if(it->second, [&](const std::pair<std::shared_ptr<ws_stream>, std::string> &s) {
-                        return stream.get() == s.first.get();
-                    });
+                    std::erase_if(it->second, [&](const std::shared_ptr<ws_stream> &s) { return stream.get() == s.get(); });
                 }
 
                 lock.unlock();
 
                 throw;
             }
-        }
-    };
-
-    router.http_handlers["DELETE /ws/state"] = [this](const http_request &req, http_response &res) -> asio::awaitable<void> {
-        auto url = boost::urls::parse_uri_reference(req.target());
-        if (!url) {
-            res.result(http::status::bad_request);
-            co_return;
-        }
-
-        auto params = url->params();
-
-        std::string remote_name;
-        for (auto param : params) {
-            if (param.key == "remoteName")
-                remote_name = std::string(param.value);
-        }
-        if (remote_name.empty()) {
-            res.result(http::status::bad_request);
-            co_return;
-        }
-
-        std::unique_lock<std::mutex> lock(this->mtx);
-        for (auto &[_, streams] : this->rooms) {
-            std::erase_if(streams, [&](const std::pair<std::shared_ptr<ws_stream>, std::string> &s) {
-                return remote_name == s.second;
-            });
         }
     };
 }

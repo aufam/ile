@@ -43,6 +43,7 @@ ile::App::App(const ile::Cli::Serve &args)
     api_tickets();
     api_items();
     api_states();
+    api_images();
 
     router.http_handlers["GET /api/rooms"] = [this](const http_request &, http_response &res) -> asio::awaitable<void> {
         std::unique_lock<std::mutex> lock(this->mtx);

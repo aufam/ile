@@ -132,22 +132,22 @@
         <div class="station-grid">
           <div>
             <label class="station-field-label"><i class="fa-solid fa-code-branch"></i>Branch</label>
-            <div id="stationBranch" class="station-display-value">Jakarta Barat</div>
+            <div id="stationBranch" class="station-display-value"></div>
           </div>
 
           <div>
             <label class="station-field-label"><i class="fa-solid fa-desktop"></i>Counter</label>
-            <div id="stationCounter" class="station-display-value">Counter #01</div>
+            <div id="stationCounter" class="station-display-value"></div>
           </div>
 
           <div>
             <label class="station-field-label"><i class="fa-solid fa-user-gear"></i>Staff Name</label>
-            <div id="stationStaff" class="station-display-value">Jane Doe (Appraiser)</div>
+            <div id="stationStaff" class="station-display-value"></div>
           </div>
 
           <div>
             <label class="station-field-label"><i class="fa-solid fa-calendar-day"></i>Session Date</label>
-            <div id="stationDate" class="station-display-value">2026-08-07</div>
+            <div id="stationDate" class="station-display-value"></div>
           </div>
 
           <div class="station-action-cell">
@@ -288,7 +288,8 @@
                   <div class="photo-slot-actions">
                     <label class="photo-upload-label">
                       <i class="fa-solid fa-upload"></i>Upload
-                      <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'photo1')">
+                      <input type="file" accept="image/jpg,image/jpeg" class="hidden"
+                        onchange="handleImageUpload(event, 'photo1')">
                     </label>
                     <button type="button" onclick="presetSampleImage('photo1', 'jewelry')" class="photo-sample-btn"
                       title="Load Sample Preset">
@@ -312,7 +313,8 @@
                   <div class="photo-slot-actions">
                     <label class="photo-upload-label">
                       <i class="fa-solid fa-upload"></i>Upload
-                      <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'photo2')">
+                      <input type="file" accept="image/jpg,image/jpeg" class="hidden"
+                        onchange="handleImageUpload(event, 'photo2')">
                     </label>
                     <button type="button" onclick="presetSampleImage('photo2', 'scale')" class="photo-sample-btn"
                       title="Load Sample Preset">
@@ -336,7 +338,8 @@
                   <div class="photo-slot-actions">
                     <label class="photo-upload-label">
                       <i class="fa-solid fa-upload"></i>Upload
-                      <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'photo3')">
+                      <input type="file" accept="image/jpg,image/jpeg" class="hidden"
+                        onchange="handleImageUpload(event, 'photo3')">
                     </label>
                     <button type="button" onclick="presetSampleImage('photo3', 'xrf')" class="photo-sample-btn"
                       title="Load Sample Preset">
@@ -351,50 +354,53 @@
             <!-- Numerical Measurement Metrics -->
             <div class="metrics-grid">
 
-              <!-- Weight in Grams -->
+              <!-- Weight -->
               <div>
-                <label class="field-label">
-                  Weight (Grams) <span class="required">*</span>
-                </label>
+                <label class="field-label"> Weight (Grams) </label>
+
                 <div class="field-with-suffix">
-                  <input type="number" step="0.01" min="0" id="itemWeight" required oninput="calculateItemTotal()"
-                    inputmode="decimal" placeholder="0.00" class="field-input mono">
+                  <input type="text" id="itemWeight" oninput="calculateItemTotal()" inputmode="decimal"
+                    placeholder="0.00" class="field-input mono">
                   <span class="field-suffix">g</span>
                 </div>
               </div>
 
-              <!-- Carat / Karat Purity -->
+              <!-- Purity -->
               <div>
-                <label class="field-label">
-                  Purity / Carat (K) <span class="required">*</span>
-                </label>
-                <div class="preset-row">
-                  <input type="text" id="itemCarat" required oninput="calculateItemTotal()"
-                    placeholder="e.g. LM Certi (2026)" class="field-input mono">
+                <label class="field-label"> Purity (%) </label>
 
-                  <select onchange="applyCaratPreset(this.value)" class="preset-select">
-                    <option value="">Preset</option>
-                  </select>
+                <div class="field-with-suffix">
+                  <input type="number" id="itemPurity" oninput="calculateItemTotal()" inputmode="numeric" min="0"
+                    max="99" step="1" placeholder="0" class="field-input mono">
+                  <span class="field-suffix">%</span>
                 </div>
+              </div>
+
+              <!-- Price Type -->
+              <div>
+                <label class="field-label"> Price Type </label>
+
+                <select id="itemPriceType" onchange="applyPriceTypePreset(this.value)"
+                  class="field-input preset-select">
+                  <option value="">Preset</option>
+                </select>
               </div>
 
               <!-- Price Per Gram -->
               <div>
-                <label class="field-label">
-                  Price Per Gram (Rp / g) <span class="required">*</span>
-                </label>
+                <label class="field-label"> Price Per Gram (Rp / g) </label>
+
                 <div class="field-with-prefix">
                   <span class="field-prefix">Rp</span>
-                  <input type="text" inputmode="numeric" id="itemPricePerGram" required oninput="calculateItemTotal()"
+                  <input type="text" inputmode="numeric" id="itemPricePerGram" oninput="calculateItemTotal()"
                     placeholder="0" class="field-input mono">
                 </div>
               </div>
 
-              <!-- Calculated Total Offer Price -->
-              <div>
-                <label class="field-label amber">
-                  Item Calculated Offer (Rp)
-                </label>
+              <!-- Calculated Total -->
+              <div class="metrics-total">
+                <label class="field-label amber"> Item Calculated Offer (Rp) </label>
+
                 <div class="field-with-prefix">
                   <span class="field-prefix amber">Rp</span>
                   <input type="text" id="itemTotalPrice" readonly placeholder="0"
@@ -491,8 +497,7 @@
               <span class="certificate-brand-name">ILoveEmas</span>
               <span class="certificate-brand-tag">Valuation Receipt</span>
             </div>
-            <p class="certificate-branch-addr" id="reportBranchAddress">Central Grand Branch • Gold & Precious Metals
-              Evaluation Lab</p>
+            <p class="certificate-branch-addr" id="reportBranchAddress"></p>
           </div>
 
           <div class="certificate-meta">

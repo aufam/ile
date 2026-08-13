@@ -1,7 +1,6 @@
 module;
 
 #include <filesystem>
-#include <map>
 #include <unordered_map>
 #include <xxhash.h>
 #include "../boost.h"
@@ -54,35 +53,42 @@ std::string_view mime_type(fs::path const &p) {
     return "application/octet-stream";
 }
 
-std::pair<std::string, bool> match_filepath(const std::string &root_str, const std::string &path_str) {
+std::pair<std::string, bool> match_filepath(const std::string &root_uri, const std::string &root_fs, const std::string &uri) {
+    if (!uri.starts_with(root_uri))
+        return {};
+
+    if (uri.size() > root_uri.size() && !root_uri.ends_with('/') && uri[root_uri.size()] != '/')
+        return {};
+
     std::error_code ec;
-
-    fs::path root = fs::weakly_canonical(root_str, ec);
+    const auto      root = fs::weakly_canonical(root_fs, ec);
     if (ec)
         return {};
 
-    fs::path path = fs::weakly_canonical(root / path_str, ec);
+    auto path = fs::weakly_canonical(root / uri.substr(root_uri.size()), ec);
     if (ec)
         return {};
 
-    auto rel = path.lexically_relative(root);
-    if (rel.empty() || rel.native().starts_with(".."))
+    if (auto rel = path.lexically_relative(root); rel.empty() || rel.native().starts_with(".."))
         return {};
 
-    if (!fs::exists(path))
+    if (fs::is_directory(path, ec)) {
+        if (!uri.ends_with('/'))
+            return {uri + '/', true}; // redirect to uri + /
+
+        path /= "index.html";
+    } else if (ec) {
+        return {};
+    }
+
+    if (!fs::is_regular_file(path, ec) || ec)
         return {};
 
-    if (!fs::is_directory(path))
-        return {path.string(), false};
-
-    return {path.string(), true};
+    return {path.string(), false};
 }
 
-std::variant<ile::Router::HttpHandler, std::string> match_uri(
-    const std::unordered_map<std::string, ile::Router::HttpHandler> &handlers,
-    const std::map<std::string, std::string>                        &mounts,
-    const http_request                                              &req
-) {
+std::variant<ile::Router::HttpHandler, std::string>
+match_uri(const ile::Router::HttpHandlers &handlers, const ile::Router::Mounts &mounts, const http_request &req) {
     const auto target = req.target();
     const auto uri    = std::string(target.substr(0, target.find('?')));
 
@@ -97,18 +103,15 @@ std::variant<ile::Router::HttpHandler, std::string> match_uri(
         return it->second;
 
     if (req.method_string() == "GET") {
-        for (const auto &[root, fs_root] : mounts) {
-            if (!uri.starts_with(root))
-                continue;
-
-            auto [path, redirect] = match_filepath(fs_root, uri.substr(root.size()));
+        for (const auto &[root_uri, root_fs] : mounts) {
+            auto [path, redirect] = match_filepath(root_uri, root_fs, uri);
             if (path.empty())
                 continue;
 
             if (!redirect)
                 return std::move(path);
 
-            return [uri = uri + "/index.html"](const http_request &, http_response &res) -> asio::awaitable<void> {
+            return [uri = path](const http_request &, http_response &res) -> asio::awaitable<void> {
                 res.result(http::status::moved_permanently);
                 res.set(http::field::location, uri);
                 co_return;

@@ -15,23 +15,8 @@ asio::awaitable<void> ile::App::async_cancel() {
     try {
         acceptor.close();
     } catch (boost::system::system_error &e) {
-        fmt::println(stderr, "Failed to close acceptor: {}", e.what());
+        std::ignore = e;
     }
 
-    try {
-        router.close_all_streams();
-    } catch (boost::system::system_error &e) {
-        fmt::println(stderr, "Failed to close acceptor: {}", e.what());
-    }
-
-    try {
-        std::scoped_lock lock(mtx);
-        for (auto &[_, streams] : rooms) {
-            for (auto &[stream, _] : streams) {
-                stream->close(ws::close_code::normal);
-            }
-        }
-    } catch (boost::system::system_error &e) {
-        fmt::println(stderr, "Failed to close acceptor: {}", e.what());
-    }
+    co_await router.close_all_streams();
 }

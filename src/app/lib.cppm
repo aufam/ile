@@ -85,7 +85,7 @@ private:
             return h1 ^ (h2 << 1) ^ (h3 << 2);
         }
     };
-    std::unordered_map<Room, std::vector<std::pair<std::shared_ptr<ws_stream>, std::string>>, RoomHash> rooms;
+    std::unordered_map<Room, std::vector<std::shared_ptr<ws_stream>>, RoomHash> rooms;
 
     asio::awaitable<void> broadcast(const Room &room);
 
@@ -93,4 +93,5 @@ private:
     void api_tickets();
     void api_items();
     void api_states();
+    void api_images();
 };

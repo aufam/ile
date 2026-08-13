@@ -1,5 +1,6 @@
 let stateWebSocket;
 let shouldReconnect = true;
+let firstConnect = true;
 
 function connectStateWebSocket() {
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
@@ -20,17 +21,16 @@ function connectStateWebSocket() {
 
     const len = ticketsData.length;
 
-    const broadcastData = JSON.parse(event.data);
-    ticketsData = broadcastData.ticketsData;
-    remoteName = broadcastData.remoteName;
+    ticketsData = JSON.parse(event.data);
 
-    if (ticketsData.length > len) {
+    if (!firstConnect && ticketsData.length > len) {
       activeTicketId = ticketsData[0].id;
 
       closeNewTicketModal();
       loadActiveTicket();
       switchTab('measurementTab');
     }
+    firstConnect = false;
 
     renderActiveTicketItems();
     renderQueueGrid();

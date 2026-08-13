@@ -3,7 +3,7 @@ function renderCustomerPresentation() {
   const ticket = getActiveTicket();
   if (!ticket) return;
 
-  document.getElementById('reportBranchAddress').textContent = `${ticket.branch} • ${ticket.counter}`;
+  document.getElementById('reportBranchAddress').textContent = `${ticket.office} • ${ticket.counter}`;
   document.getElementById('reportQueueNo').textContent = ticket.customer_queue_number;
   document.getElementById('reportDate').textContent = ticket.date;
   document.getElementById('reportStaff').textContent = ticket.staff_name;
@@ -56,11 +56,11 @@ function renderCustomerPresentation() {
                         </div>
                         <div>
                             <span class="metric-label">Assayed Carat</span>
-                            <span class="metric-value amber">${item.price_type}K</span>
+                            <span class="metric-value amber">${item.price_type}${item.purity > 0 ? ' ' + item.purity + '%' : ''}</span>
                         </div>
                         <div>
                             <span class="metric-label">Assigned Rate</span>
-                            <span class="metric-value">${formatRupiah(item.price_per_gram)} / g</span>
+                            <span class="metric-value">Rp${formatRupiah(item.price_per_gram)} / g</span>
                         </div>
                     </div>
                 `;

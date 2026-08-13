@@ -18,13 +18,23 @@ struct ile::Router {
     using HttpHandler = std::function<asio::awaitable<void>(const http_request &, http_response &)>;
     using WsHandler   = std::function<asio::awaitable<void>(const http_request &, std::shared_ptr<ws_stream>)>;
 
-    std::unordered_map<std::string, HttpHandler> http_handlers;
-    std::unordered_map<std::string, WsHandler>   ws_handlers;
-    std::map<std::string, std::string>           mounts;
-    std::atomic_bool                             is_running = true;
+    using HttpHandlers = std::unordered_map<std::string, HttpHandler>;
+    using WsHandlers   = std::unordered_map<std::string, WsHandler>;
+
+    struct longest_first {
+        bool operator()(const std::string &a, const std::string &b) const {
+            return a.size() == b.size() ? a < b : a.size() > b.size();
+        }
+    };
+    using Mounts = std::map<std::string, std::string, longest_first>;
+
+    HttpHandlers     http_handlers;
+    WsHandlers       ws_handlers;
+    Mounts           mounts;
+    std::atomic_bool is_running = true;
 
     asio::awaitable<void> handle(beast::tcp_stream) const;
-    void                  close_all_streams() const;
+    asio::awaitable<void> close_all_streams() const;
 
 private:
     asio::awaitable<bool> handle_http(const std::string &remote_name, beast::tcp_stream &, const http_request &) const;

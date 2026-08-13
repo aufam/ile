@@ -50,14 +50,35 @@ function closeSignatureModal() {
   document.getElementById('signatureModal').classList.add('hidden');
 }
 
-function saveSignature() {
+async function saveSignature() {
+  // e.preventDefault();
+
   const ticket = getActiveTicket();
-  if (ticket) {
-    ticket.signature = sigCanvas.toDataURL();
-    ticket.status = "Completed";
-    renderCustomerPresentation();
-    renderQueueGrid();
-    showToast("Customer signature saved! Valuation trade completed.");
+  if (!ticket) {
+    showToast('Failed: no ticket selected');
+    closeSignatureModal();
+    return;
   }
+
+  ticket.signature = sigCanvas.toDataURL();
+  ticket.status = "Completed";
+
+  const response = await fetch('/api/tickets',
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(ticket)
+    },
+  );
+
+  if (!response.ok) {
+    showToast(`Failed: ${response.status}`);
+    closeSignatureModal();
+    return;
+  }
+
+  renderCustomerPresentation();
+  renderQueueGrid();
+  showToast("Customer signature saved! Valuation trade completed.");
   closeSignatureModal();
 }

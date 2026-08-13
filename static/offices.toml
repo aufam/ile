@@ -1,7 +1,7 @@
 ["Jakarta-Barat"]
 name = "Jakarta Barat"
 manager = "Budi"
-counters = ["Counter #1", "Counter #2", "Counter #3"]
+counters = ["1", "2", "3"]
 pricelist = [
     { type = "LM Certi (2026)",        price = 2_465_636, description = "LM Certi tahun 2026" },
     { type = "LM Certi (2024-2025)",   price = 2_325_636, description = "LM Certi tahun 2024 - 2025" },
@@ -57,7 +57,7 @@ pricelist = [
 ["Tanjung-Barat"]
 name = "Tanjung Barat"
 manager = "Sucipto"
-counters = ["Counter #1", "Counter #2", "Counter #3"]
+counters = ["1", "2", "3"]
 pricelist = [
     { type = "LM Certi (2026)",        price = 2_465_636, description = "LM Certi tahun 2026" },
     { type = "LM Certi (2024-2025)",   price = 2_325_636, description = "LM Certi tahun 2024 - 2025" },
@@ -113,7 +113,7 @@ pricelist = [
 ["Artha-Gading-Mall"]
 name = "Artha Gading Mall"
 manager = "Agus"
-counters = ["Counter #1", "Counter #2", "Counter #3"]
+counters = ["1", "2", "3"]
 pricelist = [
     { type = "LM Certi (2026)",        price = 2_465_636, description = "LM Certi tahun 2026" },
     { type = "LM Certi (2024-2025)",   price = 2_325_636, description = "LM Certi tahun 2024 - 2025" },

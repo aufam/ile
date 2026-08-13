@@ -79,7 +79,32 @@ void ile::App::api_tickets() {
             co_return;
         }
 
-        db(ile::database::insert_tickets(ticket));
+        db(ile::database::insert_into_tickets(ticket));
+        res.result(http::status::ok);
+
+        lock.unlock();
+        asio::co_spawn(io, broadcast({ticket.office, ticket.counter, ticket.date}), asio::detached);
+    };
+
+    router.http_handlers["PATCH /api/tickets"] = [this](const http_request &req, http_response &res) -> asio::awaitable<void> {
+        ile::Ticket ticket;
+        try {
+            cpx::yy_json::parse(req.body(), ticket);
+        } catch (cpx::serde::error &e) {
+            fmt::println(stderr, "failed to parse json: {:?}: {}", req.body(), e.what());
+            res.result(http::status::bad_request);
+            co_return;
+        }
+
+        std::unique_lock<std::mutex> lock(this->mtx);
+
+        auto ticket_row = db(sql::select(tickets.id).from(tickets).where(tickets.id == ticket.id));
+        if (ticket_row.is_done()) {
+            res.result(http::status::not_found);
+            co_return;
+        }
+
+        db(ile::database::update_ticket(ticket));
         res.result(http::status::ok);
 
         lock.unlock();

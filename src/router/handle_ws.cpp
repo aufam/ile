@@ -24,5 +24,9 @@ ile::Router::handle_ws(const std::string &remote_name, beast::tcp_stream stream,
     };
 
     co_await ws->async_accept(req);
+
     co_await it->second(req, ws);
+
+    if (ws->is_open())
+        co_await ws->async_close(ws::close_code::normal);
 }

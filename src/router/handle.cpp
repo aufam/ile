@@ -22,13 +22,18 @@ asio::awaitable<void> ile::Router::handle(beast::tcp_stream stream) const {
     };
 
     beast::flat_buffer buffer;
-    http_request       req;
 
     try {
         while (is_running) {
             buffer.clear();
-            req = {};
-            co_await http::async_read(stream, buffer, req);
+            http_request req;
+
+            http::request_parser<http::string_body> parser;
+            parser.body_limit(20 * 1024 * 1024); // 20 MiB
+
+            co_await http::async_read(stream, buffer, parser);
+
+            req = parser.release();
 
             fmt::println(stderr, "[{}] {} {}", remote_name, req.method_string(), req.target());
 
@@ -37,7 +42,7 @@ asio::awaitable<void> ile::Router::handle(beast::tcp_stream stream) const {
                     std::unique_lock<std::mutex> lock(this->mtx);
                     this->tcp_streams.erase(remote_name);
                 }
-                fmt::println(stderr, "[{}] ws update.", remote_name);
+                fmt::println(stderr, "[{}] ws upgraded", remote_name);
                 co_await handle_ws(remote_name, std::move(stream), req);
                 co_return;
             } else {
@@ -47,40 +52,26 @@ asio::awaitable<void> ile::Router::handle(beast::tcp_stream stream) const {
             }
         }
     } catch (boost::system::system_error &e) {
-        if (e.code() == asio::error::operation_aborted)
-            fmt::println(stderr, "[{}] session aborted.", remote_name);
-        else if (e.code() == http::error::end_of_stream)
-            fmt::println(stderr, "[{}] end of stream.", remote_name);
-        else if (e.code() == asio::error::connection_reset)
-            fmt::println(stderr, "[{}] reset by peer.", remote_name);
-        else if (e.code() == asio::error::eof)
-            fmt::println(stderr, "[{}] eof.", remote_name);
-        else if (e.code() == asio::error::broken_pipe)
-            fmt::println(stderr, "[{}] broken pipe.", remote_name);
-        else if (e.code() == asio::error::connection_aborted)
-            fmt::println(stderr, "[{}] connection aborted.", remote_name);
-        else
-            fmt::println(stderr, "[{}] unknown error: {}", remote_name, e.what());
+        fmt::println(stderr, "[{}] {}", remote_name, e.code().message());
     } catch (std::exception const &e) {
         fmt::println(stderr, "[{}] uncaught error: {}", remote_name, e.what());
     }
 }
 
-void ile::Router::close_all_streams() const {
-    std::vector<beast::tcp_stream *>        tcp_streams_to_close;
+asio::awaitable<void> ile::Router::close_all_streams() const {
     std::vector<std::shared_ptr<ws_stream>> ws_streams_to_close;
-
     {
         std::scoped_lock lock(mtx);
         for (auto &[_, stream] : tcp_streams)
-            tcp_streams_to_close.push_back(stream);
+            stream->close();
         for (auto &[_, stream] : ws_streams)
             ws_streams_to_close.push_back(stream);
     }
 
-    for (auto *stream : tcp_streams_to_close)
-        stream->close();
-
     for (auto stream : ws_streams_to_close)
-        stream->next_layer().close();
+        try {
+            co_await stream->async_close(ws::close_code::normal);
+        } catch (const boost::system::system_error &e) {
+            std::ignore = e;
+        }
 }

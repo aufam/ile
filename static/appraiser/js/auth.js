@@ -7,9 +7,8 @@ function updateCounters() {
     counterSelect.innerHTML = '<option value="" disabled selected>Select an office first</option>';
     return;
   }
-  // The office data returned by /api/offices contains `counters`. 
-  // // Example: ["Counter #1", "Counter #2", "Counter #3"] 
-  const office = window.offices[selectedOffice];
+
+  const office = offices[selectedOffice];
   if (!office || !office.counters) {
     counterSelect.innerHTML = '<option value="" disabled selected>No counters available</option>';
     return;
@@ -23,23 +22,23 @@ function updateCounters() {
   }
 }
 
-document.getElementById("loginBranch").addEventListener("change", updateCounters);
-
 async function initializeLoginForm() {
   try {
     const response = await fetch("/api/offices");
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
-    window.offices = await response.json();
+
+    offices = await response.json();
     const branchSelect = document.getElementById("loginBranch");
     branchSelect.innerHTML = "";
-    for (const [id, office] of Object.entries(window.offices)) {
+    for (const [id, office] of Object.entries(offices)) {
       const option = document.createElement("option");
       option.value = id;
       option.textContent = office.name;
       branchSelect.appendChild(option);
     }
+
     updateCounters();
   } catch (error) {
     console.error("Failed to load offices:", error);
@@ -47,9 +46,11 @@ async function initializeLoginForm() {
     document.getElementById("loginCounter").innerHTML = '<option value="" disabled selected>Unable to load counters</option>';
   }
 }
-initializeLoginForm();
 
-function initAuthSession() {
+async function initAuthSession() {
+  document.getElementById("loginBranch").addEventListener("change", updateCounters);
+  await initializeLoginForm();
+
   const savedSession = localStorage.getItem(APPRAISER_SESSION_KEY);
   if (savedSession) {
     try {
@@ -60,7 +61,7 @@ function initAuthSession() {
           date: new Date().toISOString().split('T')[0] // Always force date to today
         };
         applyAppraiserSession(false);
-        showMainApp();
+        await showMainApp();
         return;
       }
     } catch (e) {
@@ -72,7 +73,7 @@ function initAuthSession() {
   showLoginPage();
 }
 
-function handleAppraiserLogin(event) {
+async function handleAppraiserLogin(event) {
   if (event) event.preventDefault();
 
   const branch = document.getElementById('loginBranch').value;
@@ -82,7 +83,7 @@ function handleAppraiserLogin(event) {
   const remember = document.getElementById('loginRemember') ? document.getElementById('loginRemember').checked : true;
 
   const select = document.querySelector('.preset-select');
-  const pricelist = window.offices[branch].pricelist;
+  const pricelist = offices[branch].pricelist;
 
   select.innerHTML = '<option value="">Preset</option>';
 
@@ -119,7 +120,7 @@ function handleAppraiserLogin(event) {
   }
 
   applyAppraiserSession(true);
-  showMainApp();
+  await showMainApp();
 }
 
 function applyAppraiserSession(notify = true) {
@@ -166,7 +167,7 @@ function showLoginPage() {
   if (mainContent) mainContent.classList.add('hidden');
 }
 
-function showMainApp() {
+async function showMainApp() {
   const loginPage = document.getElementById('appraiserLoginPage');
   const mainHeader = document.getElementById('mainHeader');
   const mainContent = document.getElementById('mainContent');
@@ -176,14 +177,36 @@ function showMainApp() {
   if (mainContent) mainContent.classList.remove('hidden');
 
   connectStateWebSocket();
+
+  const toast = showToast('Initializing data...', 'loading');
+  try {
+    const response = await fetch(
+      `/api/items` +
+      `?office=${encodeURIComponent(currentAppraiser.branch)}` +
+      `&counter=${encodeURIComponent(currentAppraiser.counter)}` +
+      `&date=${encodeURIComponent(currentAppraiser.date)}`
+    );
+
+    if (!response.ok)
+      throw new Error(`${response.status}`);
+
+    ticketsData = await response.json();
+
+    toast.querySelector('span').textContent = 'Done';
+    toast.className = 'ile-toast success';
+    toast.querySelector('i').className = 'fa-solid fa-circle-check';
+  } catch (err) {
+    toast.className = 'ile-toast error';
+    toast.querySelector('i').className = 'fa-solid fa-circle-xmark';
+    toast.querySelector('span').textContent = `Upload failed: ${err}`;
+  } finally {
+    setTimeout(() => toast.remove(), 3000);
+  }
 }
 
 function handleAppraiserLogout() {
-  localStorage.removeItem(APPRAISER_SESSION_KEY);
-
-  fetch(`/ws/state?remoteName=${remoteName}`, { method: 'DELETE' });
-
   disconnectStateWebSocket();
+  localStorage.removeItem(APPRAISER_SESSION_KEY);
   showLoginPage();
   if (typeof showToast === 'function') {
     showToast('Appraiser logged out');

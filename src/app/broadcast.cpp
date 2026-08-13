@@ -11,9 +11,6 @@ import cpx.yy_json;
 
 
 asio::awaitable<void> ile::App::broadcast(const Room &room) {
-    // fmt::println("BROADCAST: begin");
-    // cpx::defer _ = []() { fmt::println("BROADCAST: end"); };
-
     namespace sql = cpx::sql;
     using ile::database::items;
     using ile::database::tickets;
@@ -68,7 +65,7 @@ asio::awaitable<void> ile::App::broadcast(const Room &room) {
                         items.weighing_photo,
                         items.xrf_photo,
                         items.weight,
-                        items.carat,
+                        items.purity,
                         items.price_type,
                         items.price_per_gram,
                         items.total_price
@@ -87,7 +84,7 @@ asio::awaitable<void> ile::App::broadcast(const Room &room) {
                     item.weighing_photo,
                     item.xrf_photo,
                     item.weight,
-                    item.carat,
+                    item.purity,
                     item.price_type,
                     item.price_per_gram,
                     item.total_price
@@ -98,14 +95,9 @@ asio::awaitable<void> ile::App::broadcast(const Room &room) {
         }
     }
 
-    std::string _remote_name;
+    auto payload = std::make_shared<std::string>(cpx::yy_json::dump(res));
 
-    const std::tuple fields = {
-        cpx::field_ref(res)          = "ticketsData",
-        cpx::field_ref(_remote_name) = "remoteName",
-    };
-
-    std::vector<std::pair<std::shared_ptr<ws_stream>, std::string>> streams;
+    std::vector<std::shared_ptr<ws_stream>> streams;
     {
         std::unique_lock<std::mutex> lock(this->mtx);
         if (auto it = rooms.find(room); it == rooms.end()) {
@@ -115,14 +107,14 @@ asio::awaitable<void> ile::App::broadcast(const Room &room) {
         }
     }
 
-    for (auto [stream, remote_name] : streams) {
-        _remote_name = remote_name;
-        auto payload = std::make_shared<std::string>(cpx::yy_json::dump(fields));
-
+    for (auto stream : streams) {
         // TODO: need to serialize stream write?
         asio::co_spawn(
             io,
-            [stream, payload]() -> asio::awaitable<void> { co_await stream->async_write(asio::buffer(*payload)); },
+            [stream, payload]() -> asio::awaitable<void> {
+                beast::error_code ec;
+                co_await stream->async_write(asio::buffer(*payload), asio::redirect_error(asio::use_awaitable, ec));
+            },
             asio::detached
         );
     }
