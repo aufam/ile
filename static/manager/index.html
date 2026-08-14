@@ -5,12 +5,35 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ILoveEmas - Branch Manager Portal</title>
+
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Cinzel:wght@600;700&display=swap"
+    rel="stylesheet">
+
   <!-- Stylesheet -->
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="/appraiser/styles.css">
+  <link rel="stylesheet" href="/appraiser/css/login.css">
+  <link rel="stylesheet" href="/appraiser/css/header.css">
+  <link rel="stylesheet" href="/appraiser/css/header/station.css">
+  <link rel="stylesheet" href="/appraiser/css/header/nav.css">
+  <link rel="stylesheet" href="/appraiser/css/main.css">
+  <link rel="stylesheet" href="/appraiser/css/main/toast.css">
+  <link rel="stylesheet" href="/appraiser/css/main/label.css">
+  <link rel="stylesheet" href="/appraiser/css/main/input.css">
+  <link rel="stylesheet" href="/appraiser/css/main/panel.css">
+  <link rel="stylesheet" href="/appraiser/css/main/ticket.css">
+  <link rel="stylesheet" href="/appraiser/css/main/photo.css">
+  <link rel="stylesheet" href="/appraiser/css/main/button/pill.css">
+  <link rel="stylesheet" href="/appraiser/css/main/measurement.css">
+  <link rel="stylesheet" href="/appraiser/css/main/summary.css">
+  <link rel="stylesheet" href="/appraiser/css/main/presentation.css">
+  <link rel="stylesheet" href="/appraiser/css/modal/ticket.css">
+  <link rel="stylesheet" href="/appraiser/css/modal/signature.css">
+  <link rel="stylesheet" href="css/database.css">
 </head>
 
 <body class="ile-app">
@@ -50,7 +73,7 @@
         <!-- Options / Checkbox -->
         <div class="login-options-row">
           <label class="login-checkbox-label">
-            <input type="checkbox" id="loginRemember" checked>
+            <input type="checkbox" id="loginRemember">
             <span>Remember branch session on this browser</span>
           </label>
         </div>
@@ -88,7 +111,8 @@
           </div>
 
           <!-- Mobile Navigation Toggle -->
-          <button id="mobileMenuBtn" onclick="toggleMobileNav()" class="ile-mobile-menu-btn no-print" style="display:none;">
+          <button id="mobileMenuBtn" onclick="toggleMobileNav()" class="ile-mobile-menu-btn no-print"
+            style="display:none;">
             <i class="fa-solid fa-bars"></i>
           </button>
         </div>
@@ -107,11 +131,13 @@
 
           <div>
             <label class="station-field-label"><i class="fa-solid fa-calendar-day"></i>Session Date</label>
-            <input type="date" id="managerDate" class="station-date-input" onchange="handleDateChange(this.value)" title="Switch session date">
+            <input type="date" id="managerDate" class="station-date-input" onchange="handleDateChange(this.value)"
+              title="Switch session date">
           </div>
 
           <div class="station-action-cell">
-            <button type="button" onclick="handleManagerLogout()" class="station-switch-btn" title="Switch Branch Session">
+            <button type="button" onclick="handleManagerLogout()" class="station-switch-btn"
+              title="Switch Branch Session">
               <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
             </button>
           </div>
@@ -150,11 +176,13 @@
             <h2 class="ile-panel-title">
               <i class="fa-solid fa-database"></i> Database Management & API Struct Inspector
             </h2>
-            <p class="ile-panel-subtitle">View stored branch customer tickets, manage appraisal statuses, print certificates, and inspect C++ JSON backend payload.</p>
+            <p class="ile-panel-subtitle">View stored branch customer tickets, manage appraisal statuses, print
+              certificates, and inspect C++ JSON backend payload.</p>
           </div>
           <div class="db-toolbar">
-            <input type="text" id="dbSearchInput" placeholder="Search customer, queue no..." oninput="handleDatabaseSearch(this.value)" class="db-search-input">
-            
+            <input type="text" id="dbSearchInput" placeholder="Search customer, queue no..."
+              oninput="handleDatabaseSearch(this.value)" class="db-search-input">
+
             <select id="dbStatusSelect" onchange="filterDatabaseByStatus(this.value)" class="db-select-filter">
               <option value="ALL">All Statuses</option>
               <option value="In Measurement">In Measurement</option>
@@ -205,7 +233,7 @@
             </button>
           </div>
           <pre id="jsonInspector" class="json-inspector-body">
-// Select a customer ticket from the database table to inspect live struct JSON
+            // Select a customer ticket from the database table to inspect live struct JSON
           </pre>
         </div>
 
@@ -220,7 +248,8 @@
             <h2 class="ile-panel-title">
               <i class="fa-solid fa-boxes-stacked"></i> Jewelry Items Inventory & Audit
             </h2>
-            <p class="ile-panel-subtitle">Manage individual gold & jewelry items recorded across branch evaluation counters.</p>
+            <p class="ile-panel-subtitle">Manage individual gold & jewelry items recorded across branch evaluation
+              counters.</p>
           </div>
         </div>
 
@@ -237,9 +266,11 @@
       <div class="certificate-controls no-print" style="margin-bottom: 1.5rem;">
         <div>
           <h2 style="font-size: 1.1rem; font-weight: 700; color: var(--slate-100);">
-            <i class="fa-solid fa-file-certificate" style="color: var(--amber-400);"></i> Official Appraiser Valuation Certificate
+            <i class="fa-solid fa-file-certificate" style="color: var(--amber-400);"></i> Official Appraiser Valuation
+            Certificate
           </h2>
-          <p class="ile-panel-subtitle">Official valuation document with XRF assay metrics, photos, and digital acceptance signature.</p>
+          <p class="ile-panel-subtitle">Official valuation document with XRF assay metrics, photos, and digital
+            acceptance signature.</p>
         </div>
         <div style="display: flex; gap: 0.5rem; align-items: center;">
           <span id="reportStatusBadge" class="status-chip chip-emerald">Approved</span>
@@ -262,7 +293,8 @@
               <span class="certificate-brand-name">ILoveEmas</span>
               <span class="certificate-brand-tag">Valuation Certificate</span>
             </div>
-            <p class="certificate-branch-addr" id="reportBranchAddress">Jakarta Barat Branch • Gold & Precious Metals Evaluation Lab</p>
+            <p class="certificate-branch-addr" id="reportBranchAddress">Jakarta Barat Branch • Gold & Precious Metals
+              Evaluation Lab</p>
           </div>
 
           <div class="certificate-meta">
@@ -304,14 +336,18 @@
         </div>
 
         <!-- Manager Audit Note Footer -->
-        <div style="margin-top: 1.25rem; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.375rem; padding: 0.75rem; font-size: 0.775rem;">
+        <div
+          style="margin-top: 1.25rem; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.375rem; padding: 0.75rem; font-size: 0.775rem;">
           <strong style="color: #1e293b;">Branch Manager Audit Note:</strong>
-          <span id="reportManagerNotes" style="color: #475569; margin-left: 0.375rem;">Verified by Branch Manager.</span>
+          <span id="reportManagerNotes" style="color: #475569; margin-left: 0.375rem;">Verified by Branch
+            Manager.</span>
         </div>
 
         <!-- Terms Footer -->
         <div class="certificate-footer-note">
-          Disclaimer: All gold weights and purity measurements (XRF Spectrometry) were conducted in the presence of the customer. Prices are calculated based on today's official spot market exchange rate. Upon signing, payment is issued instantly to the designated customer account.
+          Disclaimer: All gold weights and purity measurements (XRF Spectrometry) were conducted in the presence of the
+          customer. Prices are calculated based on today's official spot market exchange rate. Upon signing, payment is
+          issued instantly to the designated customer account.
         </div>
 
       </div>
@@ -334,7 +370,8 @@
       <form onsubmit="handleSaveStatusUpdate(event)">
         <div class="modal-field">
           <h4 id="modalTicketTitle" style="font-size: 0.95rem; color: var(--slate-100);">Manage Queue Ticket</h4>
-          <p id="modalCustomerInfo" style="font-size: 0.8rem; color: var(--slate-400); margin-top: 0.25rem;">Customer Info</p>
+          <p id="modalCustomerInfo" style="font-size: 0.8rem; color: var(--slate-400); margin-top: 0.25rem;">Customer
+            Info</p>
         </div>
 
         <div class="modal-field">
@@ -349,7 +386,8 @@
 
         <div class="modal-field">
           <label for="modalManagerNotes">Branch Manager Audit Notes</label>
-          <textarea id="modalManagerNotes" class="modal-textarea" rows="3" placeholder="Enter audit or approval notes..."></textarea>
+          <textarea id="modalManagerNotes" class="modal-textarea" rows="3"
+            placeholder="Enter audit or approval notes..."></textarea>
         </div>
 
         <div class="modal-footer">

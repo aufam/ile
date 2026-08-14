@@ -289,6 +289,10 @@
   .certificate-photos-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+
+  .certificate-photos-grid img {
+    height: 220px;
+  }
 }
 
 .certificate-photo-label {
@@ -308,8 +312,9 @@
 
 .certificate-photos-grid img {
   width: 100%;
-  height: 8rem;
+  height: 16rem;
   object-fit: cover;
+  display: block;
   border-radius: 0.75rem;
   border: 1px solid var(--slate-800);
   background-color: var(--slate-900);

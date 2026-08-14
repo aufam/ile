@@ -23,7 +23,7 @@
 
   --rose-400: #fb7185;
   --rose-500: #f43f5e;
-  
+
   --cyan-400: #22d3ee;
   --cyan-500: #06b6d4;
 
@@ -832,7 +832,7 @@ body {
   color: #0f172a;
   border-radius: 0.875rem;
   padding: 2.5rem;
-  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
   position: relative;
 }
 
@@ -1040,7 +1040,7 @@ body {
   padding: 1.5rem;
   width: 90%;
   max-width: 480px;
-  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
 }
 
 .ile-modal-header {
@@ -1078,7 +1078,9 @@ body {
   margin-bottom: 0.375rem;
 }
 
-.modal-input, .modal-select, .modal-textarea {
+.modal-input,
+.modal-select,
+.modal-textarea {
   width: 100%;
   background-color: var(--slate-950);
   border: 1px solid var(--slate-700);
@@ -1117,12 +1119,17 @@ body {
   display: flex;
   align-items: center;
   gap: 0.625rem;
-  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
   transition: all 0.3s;
 }
 
-.ile-toast-success i { color: var(--emerald-400); }
-.ile-toast-error i { color: var(--rose-400); }
+.ile-toast-success i {
+  color: var(--emerald-400);
+}
+
+.ile-toast-error i {
+  color: var(--rose-400);
+}
 
 /* Print styles */
 @media print {
@@ -1130,10 +1137,18 @@ body {
     background: white !important;
     color: black !important;
   }
-  .no-print, .ile-header, .login-page-container, .ile-toast-container, .certificate-controls {
+
+  .no-print,
+  .ile-header,
+  .login-page-container,
+  .ile-toast-container,
+  .certificate-controls {
     display: none !important;
   }
-  .ile-main, .tab-content, .certificate-board {
+
+  .ile-main,
+  .tab-content,
+  .certificate-board {
     padding: 0 !important;
     margin: 0 !important;
     box-shadow: none !important;

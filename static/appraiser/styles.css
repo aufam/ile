@@ -24,6 +24,13 @@
 
   --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-serif: 'Cinzel', serif;
+
+  /* Transparent colors */
+  --slate-800-40: rgba(221, 230, 240, 0.4);
+  --amber-400-20: rgba(74, 144, 196, 0.2);
+  --amber-400-40: rgba(74, 144, 196, 0.4);
+  --emerald-500-20: rgba(16, 185, 129, 0.2);
+  --emerald-500-40: rgba(16, 185, 129, 0.4);
 }
 
 * {
@@ -144,6 +151,15 @@ body {
 }
 
 @media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  body {
+    margin: 0;
+  }
+
   .no-print {
     display: none !important;
   }
@@ -152,12 +168,32 @@ body {
     display: block !important;
   }
 
+  .item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
   .ile-app {
     background: white !important;
     color: black !important;
+    border: none !important;
+    border-radius: 0;
+    box-shadow: none;
   }
-}
 
+  .certificate-board {
+    background-color: white;
+    border: none !important;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .certificate-item-card {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+}
 
 /* --- Utility layout helpers --- */
 .hidden {
