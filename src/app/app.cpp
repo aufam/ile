@@ -38,38 +38,18 @@ ile::App::App(const ile::Cli::Serve &args)
     if (std::filesystem::exists(args.offices))
         cpx::toruniina_toml::parse_from_file(args.offices, this->offices);
 
-    router.mounts["/"] = "static";
+    router.mount("/", "static");
+    api();
     api_offices();
     api_tickets();
     api_items();
     api_states();
     api_images();
 
-    router.http_handlers["GET /api/rooms"] = [this](const http_request &, http_response &res) -> asio::awaitable<void> {
-        std::unique_lock<std::mutex> lock(this->mtx);
-
-        std::vector<Room>   rooms;
-        std::vector<size_t> lengths;
-        for (auto &[room, streams] : this->rooms) {
-            rooms.push_back(room);
-            lengths.push_back(streams.size());
-        }
-
-        std::tuple fields = {
-            cpx::field_ref(rooms)   = "rooms",
-            cpx::field_ref(lengths) = "lengths",
-        };
-
-        res.body() = cpx::yy_json::dump(fields);
-        res.set(http::field::content_type, "application/json");
-        res.result(http::status::ok);
-        co_return;
-    };
-
-    router.ws_handlers["/audio"] = [this](const http_request &, std::shared_ptr<ws_stream> stream) -> asio::awaitable<void> {
+    router.route_ws("/audio", [this](Context &c) -> asio::awaitable<void> {
         while (is_running) {
             beast::flat_buffer buffer;
-            co_await stream->async_read(buffer);
+            co_await c.ws_stream->async_read(buffer);
 
             std::string_view sv(static_cast<const char *>(buffer.data().data()), buffer.size());
             if (sv == "done") {
@@ -91,5 +71,5 @@ ile::App::App(const ile::Cli::Serve &args)
                 co_return;
             }
         }
-    };
+    });
 }

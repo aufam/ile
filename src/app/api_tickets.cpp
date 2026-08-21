@@ -20,15 +20,11 @@ void ile::App::api_tickets() {
     namespace sql = cpx::sql;
     using ile::database::tickets;
 
-    router.http_handlers["POST /api/tickets"] = [this](const http_request &req, http_response &res) -> asio::awaitable<void> {
-        auto url = boost::urls::parse_uri_reference(req.target());
-        if (!url) {
-            fmt::println(stderr, "URL parse failed");
-            res.result(http::status::bad_request);
-            co_return;
-        }
+    router.route("POST /api/tickets", [this](Context &c) -> asio::awaitable<void> {
+        auto &req = c.parser_string().get();
+        auto &res = c.response_string();
 
-        auto params = url->params();
+        auto params = c.url.params();
 
         ile::Ticket ticket;
         for (auto param : params) {
@@ -84,9 +80,12 @@ void ile::App::api_tickets() {
 
         lock.unlock();
         asio::co_spawn(io, broadcast({ticket.office, ticket.counter, ticket.date}), asio::detached);
-    };
+    });
 
-    router.http_handlers["PATCH /api/tickets"] = [this](const http_request &req, http_response &res) -> asio::awaitable<void> {
+    router.route("PATCH /api/tickets", [this](Context &c) -> asio::awaitable<void> {
+        auto &req = c.parser_string().get();
+        auto &res = c.response_string();
+
         ile::Ticket ticket;
         try {
             cpx::yy_json::parse(req.body(), ticket);
@@ -109,20 +108,15 @@ void ile::App::api_tickets() {
 
         lock.unlock();
         asio::co_spawn(io, broadcast({ticket.office, ticket.counter, ticket.date}), asio::detached);
-    };
+    });
 
-    router.http_handlers["DELETE /api/tickets"] = [this](const http_request &req, http_response &res) -> asio::awaitable<void> {
-        auto url = boost::urls::parse_uri_reference(req.target());
-        if (!url) {
-            fmt::println(stderr, "URL parse failed");
-            res.result(http::status::bad_request);
-            co_return;
-        }
+    router.route("DELETE /api/tickets", [this](Context &c) -> asio::awaitable<void> {
+        auto &res = c.response_string();
 
         long long   id = 0;
         std::string office, counter, date;
 
-        auto params = url->params();
+        auto params = c.url.params();
         for (auto param : params) {
             if (param.key == "id")
                 id = std::stoll(param.value);
@@ -153,5 +147,5 @@ void ile::App::api_tickets() {
 
         lock.unlock();
         asio::co_spawn(io, broadcast({office, counter, date}), asio::detached);
-    };
+    });
 }

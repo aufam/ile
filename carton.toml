@@ -14,7 +14,7 @@ whisper = {
     version = "1.9.1",
     features = [
         "ggml/cpu",
-        "ggml/blas", "ggml/metal" # only for mac
+        # "ggml/blas", "ggml/metal" # only for mac
     ],
 }
 miniaudio = "0.11.25"

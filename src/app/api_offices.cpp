@@ -16,14 +16,23 @@ import cpx.yy_json;
 
 
 void ile::App::api_offices() {
-    router.http_handlers["GET /api/offices"] = [this](const http_request &, http_response &res) -> asio::awaitable<void> {
-        std::unique_lock<std::mutex> lock(this->mtx);
-        res.body() = cpx::yy_json::dump(this->offices);
+    router.route("GET /api/offices", [this](Context &c) -> asio::awaitable<void> {
+        std::string body;
+        {
+            std::unique_lock<std::mutex> lock(this->mtx);
+            body = cpx::yy_json::dump(this->offices);
+        }
+
+        auto &res  = c.response_string();
+        res.body() = std::move(body);
         res.set(http::field::content_type, "application/json");
         co_return;
-    };
+    });
 
-    router.http_handlers["PATCH /api/prices"] = [this](const http_request &req, http_response &res) -> asio::awaitable<void> {
+    router.route("PATCH /api/prices", [this](Context &c) -> asio::awaitable<void> {
+        auto &req = c.parser_string().get();
+        auto &res = c.response_string();
+
         std::string office, price_type;
         size_t      new_price;
         std::tuple  fields = {
@@ -60,5 +69,5 @@ void ile::App::api_offices() {
         ofs << cpx::toruniina_toml::io << this->offices;
         res.result(http::status::no_content);
         co_return;
-    };
+    });
 }

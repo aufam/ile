@@ -9,17 +9,12 @@ import cpx;
 import cpx.yy_json;
 
 void ile::App::api_images() {
-    router.http_handlers["POST /api/images"] = [](const http_request &req, http_response &res) -> asio::awaitable<void> {
-        auto url = boost::urls::parse_uri_reference(req.target());
-        if (!url) {
-            fmt::println(stderr, "URL parse error");
-            res.result(http::status::bad_request);
-            co_return;
-        }
+    router.route("POST /api/images", [](Context &c) -> asio::awaitable<void> {
+        auto &req    = c.parser_string().get();
+        auto &res    = c.response_string();
+        auto  params = c.url.params();
 
         std::string key, office, counter, date;
-
-        auto params = url->params();
         for (auto param : params) {
             if (param.key == "key")
                 key = std::string(param.value);
@@ -83,5 +78,5 @@ void ile::App::api_images() {
         res.body() = cpx::yy_json::dump(fields);
         res.set(http::field::content_type, "application/json");
         res.result(http::status::ok);
-    };
+    });
 }

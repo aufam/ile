@@ -19,16 +19,11 @@ void ile::App::api_items() {
     using ile::database::items;
     using ile::database::tickets;
 
-    router.http_handlers["GET /api/items"] = [this](const http_request &req, http_response &res) -> asio::awaitable<void> {
-        auto url = boost::urls::parse_uri_reference(req.target());
-        if (!url) {
-            res.result(http::status::bad_request);
-            co_return;
-        }
+    router.route("GET /api/items", [this](Context &c) -> asio::awaitable<void> {
+        auto &res    = c.response_string();
+        auto  params = c.url.params();
 
         Room room;
-
-        auto params = url->params();
         for (auto param : params) {
             if (param.key == "office")
                 room.office = std::string(param.value);
@@ -127,20 +122,16 @@ void ile::App::api_items() {
         res.set(http::field::content_type, "application/json");
         res.result(http::status::ok);
         co_return;
-    };
+    });
 
-    router.http_handlers["POST /api/items"] = [this](const http_request &req, http_response &res) -> asio::awaitable<void> {
-        auto url = boost::urls::parse_uri_reference(req.target());
-        if (!url) {
-            fmt::println(stderr, "URL parse error");
-            res.result(http::status::bad_request);
-            co_return;
-        }
+    router.route("POST /api/items", [this](Context &c) -> asio::awaitable<void> {
+        auto &req    = c.parser_string().get();
+        auto &res    = c.response_string();
+        auto  params = c.url.params();
 
         std::string office, counter, date;
         long long   ticket_id = 0;
 
-        auto params = url->params();
         for (auto param : params) {
             if (param.key == "office")
                 office = std::string(param.value);
@@ -186,19 +177,15 @@ void ile::App::api_items() {
 
         lock.unlock();
         asio::co_spawn(io, broadcast({office, counter, date}), asio::detached);
-    };
+    });
 
-    router.http_handlers["DELETE /api/items"] = [this](const http_request &req, http_response &res) -> asio::awaitable<void> {
-        auto url = boost::urls::parse_uri_reference(req.target());
-        if (!url) {
-            res.result(http::status::bad_request);
-            co_return;
-        }
+    router.route("DELETE /api/items", [this](Context &c) -> asio::awaitable<void> {
+        auto &res    = c.response_string();
+        auto  params = c.url.params();
 
         long long   id = 0;
         std::string office, counter, date;
 
-        auto params = url->params();
         for (auto param : params) {
             if (param.key == "id")
                 id = std::stoll(param.value);
@@ -229,5 +216,5 @@ void ile::App::api_items() {
 
         lock.unlock();
         asio::co_spawn(io, broadcast({office, counter, date}), asio::detached);
-    };
+    });
 }

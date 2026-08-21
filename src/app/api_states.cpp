@@ -14,17 +14,8 @@ import cpx.toruniina_toml;
 import cpx.yy_json;
 
 void ile::App::api_states() {
-    router.ws_handlers["/ws/state"] =
-        [this](const http_request &req, std::shared_ptr<ws_stream> stream) -> asio::awaitable<void> {
-        const auto &socket      = stream->next_layer();
-        const auto  remote      = socket.remote_endpoint();
-        const auto  remote_name = fmt::format("{}:{}", remote.address().to_string(), remote.port());
-
-        auto url = boost::urls::parse_uri_reference(req.target());
-        if (!url)
-            co_return;
-
-        auto params = url->params();
+    router.route_ws("/ws/state", [this](Context &c) -> asio::awaitable<void> {
+        auto params = c.url.params();
 
         std::string office, counter, date;
         for (auto param : params) {
@@ -42,11 +33,11 @@ void ile::App::api_states() {
 
             auto it = this->offices.find(office);
             if (it == this->offices.end()) {
-                co_await stream->async_close("office not found");
+                co_await c.ws_stream->async_close("office not found");
                 co_return;
             }
 
-            this->rooms[room].push_back(stream);
+            this->rooms[room].push_back(c.ws_stream);
         }
         asio::co_spawn(io, broadcast(std::move(room)), asio::detached);
 
@@ -54,12 +45,14 @@ void ile::App::api_states() {
             beast::flat_buffer buffer;
 
             try {
-                co_await stream->async_read(buffer);
+                co_await c.ws_stream->async_read(buffer);
             } catch (boost::system::system_error &e) {
                 std::unique_lock<std::mutex> lock(this->mtx);
 
                 if (auto it = rooms.find(room); it != rooms.end()) {
-                    std::erase_if(it->second, [&](const std::shared_ptr<ws_stream> &s) { return stream.get() == s.get(); });
+                    std::ignore = std::erase_if(it->second, [&](const std::shared_ptr<ws_stream> &s) {
+                        return c.ws_stream.get() == s.get();
+                    });
                 }
 
                 lock.unlock();
@@ -67,5 +60,5 @@ void ile::App::api_states() {
                 throw;
             }
         }
-    };
+    });
 }

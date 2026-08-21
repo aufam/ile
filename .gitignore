@@ -10,3 +10,5 @@
 !.tombi.toml
 compile_commands.json
 /models
+/static/images
+/static/*.db

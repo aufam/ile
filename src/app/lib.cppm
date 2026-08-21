@@ -31,7 +31,7 @@ private:
     tcp::acceptor            acceptor;
     Whisper                  whisper;
     Router                   router;
-    std::atomic_bool        &is_running = router.is_running;
+    std::atomic_bool         is_running{true};
     cpx::sqlite3::Connection db;
     mutable std::mutex       mtx;
 
@@ -89,9 +89,11 @@ private:
 
     asio::awaitable<void> broadcast(const Room &room);
 
+    void api();
     void api_offices();
     void api_tickets();
     void api_items();
     void api_states();
     void api_images();
+    void api_rooms();
 };
