@@ -40,6 +40,7 @@ ile::App::App(const ile::Cli::Serve &args)
 
     router.mount("/", "static");
     api();
+    api_login();
     api_offices();
     api_tickets();
     api_items();

@@ -90,6 +90,7 @@ private:
     asio::awaitable<void> broadcast(const Room &room);
 
     void api();
+    void api_login();
     void api_offices();
     void api_tickets();
     void api_items();
