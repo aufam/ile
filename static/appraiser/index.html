@@ -35,9 +35,35 @@
   <link rel="stylesheet" href="css/main/presentation.css">
   <link rel="stylesheet" href="css/modal/ticket.css">
   <link rel="stylesheet" href="css/modal/signature.css">
+  <link rel="stylesheet" href="css/mobile.css">
 </head>
 
 <body class="ile-app">
+
+  <!-- ── Mobile-only: Sidebar trigger button (hamburger, top-left) ── -->
+  <button id="mobileSidebarTrigger" class="mobile-sidebar-trigger no-print hidden" onclick="openMobileSidebar()" title="Open navigation">
+    <i class="fa-solid fa-bars"></i>
+  </button>
+
+  <!-- ── Mobile-only: Sidebar overlay (click to close) ── -->
+  <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeMobileSidebar()"></div>
+
+  <!-- ── Mobile-only: Bottom Navigation Bar ── -->
+  <nav id="mobileBottomNav" class="ile-bottom-nav no-print hidden">
+    <button onclick="switchTab('queueTab')" id="bottomTabBtn-queueTab" class="ile-bottom-nav-item active">
+      <i class="fa-solid fa-users"></i>
+      <span class="nav-label">Queue</span>
+      <span id="queueBadgeMobile" class="ile-tab-count">0</span>
+    </button>
+    <button onclick="switchTab('measurementTab')" id="bottomTabBtn-measurementTab" class="ile-bottom-nav-item">
+      <i class="fa-solid fa-scale-balanced"></i>
+      <span class="nav-label">Measure</span>
+    </button>
+    <button onclick="switchTab('customerReportTab')" id="bottomTabBtn-customerReportTab" class="ile-bottom-nav-item">
+      <i class="fa-solid fa-file-invoice-dollar"></i>
+      <span class="nav-label">Report</span>
+    </button>
+  </nav>
 
   <!-- ==================== APPRAISER LOGIN PAGE ==================== -->
   <div id="appraiserLoginPage" class="login-page-container">
@@ -106,6 +132,13 @@
   <!-- Top Navigation & Station Config Header -->
   <header id="mainHeader" class="ile-header no-print hidden">
     <div class="ile-header-inner">
+      <!-- Mobile: Close sidebar button (hidden on desktop) -->
+      <div class="sidebar-close-btn">
+        <button onclick="closeMobileSidebar()" title="Close sidebar">
+          <i class="fa-solid fa-xmark"></i> Close
+        </button>
+      </div>
+
       <div class="ile-header-row">
 
         <!-- Brand Title -->

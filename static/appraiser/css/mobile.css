@@ -1,0 +1,265 @@
+/* ============================================================
+   MOBILE LAYOUT — Sidebar + Bottom Navigation Bar
+   Applied only on screens ≤ 1023px (mobile/tablet).
+   Desktop (≥ 1024px) keeps the original top-header layout.
+   ============================================================ */
+
+/* ─── Always hidden by default (shown via media queries) ───── */
+.sidebar-overlay {
+  display: none;
+}
+
+.ile-bottom-nav {
+  display: none;
+}
+
+.mobile-sidebar-trigger {
+  display: none;
+}
+
+.sidebar-close-btn {
+  display: none;
+}
+
+/* ─── Mobile: ≤ 1023px ──────────────────────────────────────── */
+@media (max-width: 1023px) {
+
+  /* The <header> becomes a fixed left sidebar */
+  .ile-header {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 260px;
+    height: 100dvh;
+    border-bottom: none !important;
+    border-right: 1px solid var(--slate-800);
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 200;
+    backdrop-filter: blur(16px);
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ile-header.sidebar-open {
+    transform: translateX(0);
+  }
+
+  .ile-header-inner {
+    padding: 1.25rem 1rem !important;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ile-header-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 1rem !important;
+    flex: 1;
+  }
+
+  .ile-brand-block {
+    width: 100% !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.5rem;
+  }
+
+  .ile-brand-left {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  /* Hide the original hamburger inside the sidebar */
+  .ile-mobile-menu-btn {
+    display: none !important;
+  }
+
+  /* Station grid: single column in sidebar */
+  .station-grid {
+    grid-template-columns: 1fr !important;
+    width: 100%;
+  }
+
+  .station-action-cell {
+    grid-column: 1 / -1;
+  }
+
+  /* Nav tabs hidden — moved to bottom bar */
+  .ile-nav-tabs {
+    display: none !important;
+  }
+
+  /* ─── Sidebar Close Button ─── */
+  .sidebar-close-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-end;
+    margin-bottom: 0.75rem;
+  }
+
+  .sidebar-close-btn button {
+    background: none;
+    border: 1px solid var(--slate-800);
+    border-radius: 0.5rem;
+    color: var(--slate-400);
+    padding: 0.375rem 0.625rem;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+  }
+
+  .sidebar-close-btn button:hover {
+    color: var(--amber-400);
+    border-color: var(--amber-400);
+  }
+
+  /* ─── Sidebar Overlay ─── */
+  .sidebar-overlay {
+    display: block !important;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 199;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.28s ease;
+  }
+
+  .sidebar-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* ─── Bottom Navigation Bar ─── */
+  .ile-bottom-nav {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background-color: rgba(255, 255, 255, 0.97);
+    border-top: 1px solid var(--slate-800);
+    backdrop-filter: blur(16px);
+    padding: 0.25rem 0.5rem;
+    padding-bottom: calc(0.25rem + env(safe-area-inset-bottom));
+    gap: 0;
+  }
+
+  .ile-bottom-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+    padding: 0.5rem 0.25rem;
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: var(--slate-500);
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 0.5rem;
+    transition: color 0.15s ease, background-color 0.15s ease;
+    font-family: var(--font-sans);
+    line-height: 1.2;
+    text-align: center;
+    position: relative;
+    white-space: nowrap;
+  }
+
+  .ile-bottom-nav-item i {
+    font-size: 1.1rem;
+    display: block;
+    margin-bottom: 0.125rem;
+  }
+
+  .ile-bottom-nav-item span.nav-label {
+    display: block;
+    font-size: 0.6rem;
+    line-height: 1;
+  }
+
+  .ile-bottom-nav-item.active {
+    color: var(--amber-400);
+  }
+
+  .ile-bottom-nav-item.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2rem;
+    height: 2.5px;
+    background-color: var(--amber-400);
+    border-radius: 0 0 3px 3px;
+  }
+
+  .ile-bottom-nav-item:active {
+    background-color: rgba(74, 144, 196, 0.08);
+  }
+
+  /* Count badge in bottom nav */
+  .ile-bottom-nav-item .ile-tab-count {
+    position: absolute;
+    top: 0.25rem;
+    right: calc(50% - 1.3rem);
+    font-size: 0.55rem;
+    padding: 0.05rem 0.3rem;
+  }
+
+  /* ─── Hamburger Trigger (fixed top-left) ─── */
+  .mobile-sidebar-trigger {
+    display: flex !important;
+    position: fixed;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 300;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.625rem;
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 1px solid var(--slate-800);
+    backdrop-filter: blur(8px);
+    align-items: center;
+    justify-content: center;
+    color: var(--slate-400);
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: color 0.15s ease;
+  }
+
+  .mobile-sidebar-trigger:hover {
+    color: var(--amber-400);
+  }
+
+  /* ─── Main content offsets ─── */
+  .ile-main {
+    padding-top: 4rem !important;
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom)) !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+}
+
+/* ─── Desktop: hide mobile-only elements ─── */
+@media (min-width: 1024px) {
+
+  .sidebar-overlay,
+  .ile-bottom-nav,
+  .mobile-sidebar-trigger,
+  .sidebar-close-btn {
+    display: none !important;
+  }
+}

@@ -10,7 +10,7 @@ auto ile::Router::handle(std::shared_ptr<tcp_stream> stream) const -> awaitable<
     Context ctx;
     ctx.stream = stream;
 
-    auto &parser = std::get<0>(ctx.parser);
+    auto &parser = ctx.parser_empty();
     co_await http::async_read_header(*stream, ctx.buffer, parser);
 
     const auto url = urls::parse_origin_form(ctx.req().target());
@@ -24,7 +24,7 @@ auto ile::Router::handle(std::shared_ptr<tcp_stream> stream) const -> awaitable<
 
     if (boost::beast::websocket::is_upgrade(parser.get())) {
         co_await handle_ws(ctx);
-        co_return false;
+        co_return std::visit([](auto &res) { return res.keep_alive(); }, ctx.response);
     }
 
     {
@@ -33,7 +33,8 @@ auto ile::Router::handle(std::shared_ptr<tcp_stream> stream) const -> awaitable<
     };
     cpx::defer _ = [&]() {
         std::unique_lock<std::mutex> lock(_mtx);
-        std::remove_if(_tcp_streams.begin(), _tcp_streams.end(), [&](auto &s) { return s.get() == stream.get(); });
+        auto it = std::remove_if(_tcp_streams.begin(), _tcp_streams.end(), [&](auto &s) { return s == stream; });
+        _tcp_streams.erase(it, _tcp_streams.end());
     };
 
     match(ctx);
@@ -75,7 +76,7 @@ auto ile::Router::handle_ws(Context &c) const -> awaitable<bool> {
             std::remove_if(_ws_streams.begin(), _ws_streams.end(), [&](auto &s) { return s.get() == &stream; });
         };
 
-        co_await stream.async_accept(std::get<0>(c.parser).get());
+        co_await stream.async_accept(c.parser_empty().get());
 
         co_await handler(c);
 

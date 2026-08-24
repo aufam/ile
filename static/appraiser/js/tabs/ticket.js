@@ -64,6 +64,10 @@ function renderQueueGrid() {
 
   document.getElementById('queueBadge').textContent = ticketsData.length;
 
+  // Keep mobile bottom nav badge in sync
+  const mobileBadge = document.getElementById('queueBadgeMobile');
+  if (mobileBadge) mobileBadge.textContent = ticketsData.length;
+
   ticketsData.forEach(ticket => {
     const totalItems = ticket.items.length;
     const grandTotal = ticket.items.reduce((sum, item) => sum + (item.total_price || 0), 0);

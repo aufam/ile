@@ -21,10 +21,12 @@ void ile::App::api_tickets() {
     using ile::database::tickets;
 
     router.route("POST /api/tickets", [this](Context &c) -> asio::awaitable<void> {
+        fmt::println("enter post tickets");
         auto &req = c.parser_string().get();
         auto &res = c.response_string();
 
         auto params = c.url.params();
+        fmt::println("enter post tickets 2");
 
         ile::Ticket ticket;
         for (auto param : params) {
@@ -40,6 +42,7 @@ void ile::App::api_tickets() {
             res.result(http::status::bad_request);
             co_return;
         }
+        fmt::println("enter post tickets 3");
 
         std::tuple fields = {
             cpx::field_ref(ticket.staff_name)            = "staff_name",
@@ -48,6 +51,7 @@ void ile::App::api_tickets() {
             cpx::field_ref(ticket.status)                = "status",
         };
 
+        fmt::println("enter post tickets 4");
         try {
             cpx::yy_json::parse(req.body(), fields);
         } catch (cpx::serde::error &e) {

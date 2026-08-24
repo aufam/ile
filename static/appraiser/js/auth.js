@@ -161,20 +161,28 @@ function showLoginPage() {
   const loginPage = document.getElementById('appraiserLoginPage');
   const mainHeader = document.getElementById('mainHeader');
   const mainContent = document.getElementById('mainContent');
+  const mobileTrigger = document.getElementById('mobileSidebarTrigger');
+  const bottomNav = document.getElementById('mobileBottomNav');
 
   if (loginPage) loginPage.classList.remove('hidden');
   if (mainHeader) mainHeader.classList.add('hidden');
   if (mainContent) mainContent.classList.add('hidden');
+  if (mobileTrigger) mobileTrigger.classList.add('hidden');
+  if (bottomNav) bottomNav.classList.add('hidden');
 }
 
 async function showMainApp() {
   const loginPage = document.getElementById('appraiserLoginPage');
   const mainHeader = document.getElementById('mainHeader');
   const mainContent = document.getElementById('mainContent');
+  const mobileTrigger = document.getElementById('mobileSidebarTrigger');
+  const bottomNav = document.getElementById('mobileBottomNav');
 
   if (loginPage) loginPage.classList.add('hidden');
   if (mainHeader) mainHeader.classList.remove('hidden');
   if (mainContent) mainContent.classList.remove('hidden');
+  if (mobileTrigger) mobileTrigger.classList.remove('hidden');
+  if (bottomNav) bottomNav.classList.remove('hidden');
 
   connectStateWebSocket();
 

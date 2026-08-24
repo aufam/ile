@@ -142,6 +142,7 @@ body {
 
 .gold-gradient-text {
   background: linear-gradient(135deg, #cfe8f7 0%, #4a90d2 50%, #1f4c6e 100%);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -158,6 +159,9 @@ body {
 
   body {
     margin: 0;
+    border: none !important;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .no-print {
@@ -174,6 +178,7 @@ body {
   }
 
   .ile-app {
+    margin: 0;
     background: white !important;
     color: black !important;
     border: none !important;
